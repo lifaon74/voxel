@@ -1,0 +1,172 @@
+import {
+  mat4,
+  mat4_create,
+  mat4_identity,
+  mat4_rotate_x,
+  mat4_rotate_y,
+  mat4_translate,
+  readonly_mat4,
+  vec2,
+  vec2_create,
+} from '@lifaon/math';
+import { fromEventTarget, IObservable, IUnsubscribeOfObservable, merge } from '@lirx/core';
+import { createEventListener, IUnsubscribe, mergeUnsubscribeFunctions } from '@lirx/utils';
+
+
+export class FreeViewMatrix {
+  readonly #movement: vec2;
+  readonly #matrix: mat4;
+  #stop: IUnsubscribe | undefined;
+
+  constructor() {
+    this.#movement = vec2_create();
+    this.#matrix = mat4_create();
+    this.#stop = void 0;
+  }
+
+  get matrix(): readonly_mat4 {
+    return this.#matrix;
+  }
+
+  get started(): boolean {
+    return this.#stop !== void 0;
+  }
+
+  update(): readonly_mat4 {
+
+  }
+
+  start(): this {
+    if (this.#stop === void 0) {
+      const unsubscribeOfClick = createEventListener(window, 'click', () => {
+        if (document.pointerLockElement === null) {
+          document.body.requestPointerLock();
+        }
+      });
+
+      let movementX: number = 0;
+      let movementY: number = 0;
+      const keyPressed: Set<string> = new Set<string>();
+
+      createEventListener(window,'mousemove', (event: MouseEvent) => {
+        movementX += event.movementX;
+        movementY += event.movementY;
+      });
+
+      const update = (): void => {
+        mat4_identity(this.#matrix);
+        if (keyPressed.has('KeyW')) {
+          mat4_translate(this.#matrix, this.#matrix, [0, 0, translationSpeed]);
+        }
+        if (keyPressed.has('KeyS')) {
+          mat4.translate(this.#matrix, this.#matrix, [0, 0, -translationSpeed]);
+        }
+
+        if (keyPressed.has('KeyA')) {
+          mat4.translate(this.#matrix, this.#matrix, [translationSpeed, 0, 0]);
+        }
+        if (keyPressed.has('KeyD')) {
+          mat4.translate(this.#matrix, this.#matrix, [-translationSpeed, 0, 0]);
+        }
+
+        if (document.pointerLockElement !== null) {
+          mat4_rotate_x(this.#matrix, this.#matrix, movementY * rotationSpeed);
+          mat4_rotate_y(this.#matrix, this.#matrix, movementX * rotationSpeed);
+        }
+
+        // mat4.mul(out, view, this.#matrix);
+        // mat4.mul(out, this.#matrix, view);
+      };
+
+      this.#stop = mergeUnsubscribeFunctions([
+        unsubscribeOfClick,
+      ]);
+    }
+    return this;
+  }
+
+  stop(): this {
+    if (this.#stop !== void 0) {
+      this.#stop();
+      this.#stop = void 0;
+    }
+    return this;
+  }
+}
+
+
+export function create_free_camera_observable(): IObservable<mat4> {
+
+
+  const view$ = merge()
+
+
+  return
+}
+
+function startCameraControl(): IRefreshControlFunction {
+  let movementX: number = 0;
+  let movementY: number = 0;
+  const keyPressed: Set<string> = new Set<string>();
+
+  // document.addEventListener('pointerlockchange', (event: MouseEvent) => {
+  //   movementX += event.movementX;
+  //   movementY += event.movementY;
+  // });
+
+
+  window.addEventListener('click', () => {
+    if (document.pointerLockElement === null) {
+      document.body.requestPointerLock();
+    }
+  });
+
+  window.addEventListener('mousemove', (event: MouseEvent) => {
+    movementX += event.movementX;
+    movementY += event.movementY;
+  });
+
+  window.addEventListener('keydown', (event: KeyboardEvent) => {
+    // console.log(event.code);
+    keyPressed.add(event.code);
+  });
+
+  window.addEventListener('keyup', (event: KeyboardEvent) => {
+    keyPressed.delete(event.code);
+  });
+
+  // const VEC3: vec3 = vec3.create();
+  const transformMatrix: mat4 = mat4.create();
+
+  return (
+    out: mat4,
+    view: mat4,
+    translationSpeed: number = 1,
+    rotationSpeed: number = 0.01,
+  ): void => {
+    mat4.identity(transformMatrix);
+    if (keyPressed.has('KeyW')) {
+      mat4.translate(transformMatrix, transformMatrix, [0, 0, translationSpeed]);
+    }
+    if (keyPressed.has('KeyS')) {
+      mat4.translate(transformMatrix, transformMatrix, [0, 0, -translationSpeed]);
+    }
+
+    if (keyPressed.has('KeyA')) {
+      mat4.translate(transformMatrix, transformMatrix, [translationSpeed, 0, 0]);
+    }
+    if (keyPressed.has('KeyD')) {
+      mat4.translate(transformMatrix, transformMatrix, [-translationSpeed, 0, 0]);
+    }
+
+    if (document.pointerLockElement !== null) {
+      mat4.rotateX(transformMatrix, transformMatrix, movementY * rotationSpeed);
+      mat4.rotateY(transformMatrix, transformMatrix, movementX * rotationSpeed);
+    }
+
+    // mat4.mul(out, view, transformMatrix);
+    mat4.mul(out, transformMatrix, view);
+    movementX = 0;
+    movementY = 0;
+  };
+}

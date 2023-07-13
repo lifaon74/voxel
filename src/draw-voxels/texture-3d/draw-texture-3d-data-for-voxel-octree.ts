@@ -1,20 +1,18 @@
 import { u8 } from '../../../../number-types/dist';
-import { VOXEL_MATERIAL_BYTE_SIZE } from '../../material/voxel-material-byte-size.constant';
-import { write_voxel_material_in_memory } from '../../material/write-voxel-material-in-memory';
-import { IAllocFunction } from '../../memory/alloc-function.type';
-import { IMemoryAddress } from '../../memory/memory-address.type';
-import { IMemory } from '../../memory/memory.type';
+import { SIZEOF_VOXEL_MATERIAL } from '../../voxel/material/constants/sizeof_voxel_material.constant';
+import { write_voxel_material_in_memory } from '../../voxel/material/functions/write/write_voxel_material_in_memory';
+import { IMemoryAddress } from '../../voxel/memory/types/memory-address.type';
+import { IMemory } from '../../voxel/memory/memory.type';
 import {
-  write_voxel_octree_material_address_in_memory
-} from '../../octree/functions/operations/write-voxel-octree-material-address-in-memory';
-import { NO_MATERIAL } from '../../octree/special-addresses.constant';
+  allocate_and_write_voxel_material_address_in_memory_of_voxel_octree_at_position
+} from '../../voxel/octree/functions/voxel-material/at-position/allocate_and_write_voxel_material_address_in_memory_of_voxel_octree_at_position';
+import { NO_MATERIAL } from '../../voxel/octree/special-addresses.constant';
 import { ITexture3DData } from './texture-3d-data.type';
 
 export function drawTexture3DDataForVoxelOctree(
   memory: IMemory,
   voxelOctreeAddress: IMemoryAddress,
   voxelOctreeDepth: u8,
-  alloc: IAllocFunction,
   texture: ITexture3DData,
 ): void {
   const x_size: number = texture[0].x;
@@ -31,12 +29,12 @@ export function drawTexture3DDataForVoxelOctree(
         if (data[i + 3] === 0) {
           materialAddress = NO_MATERIAL;
         } else {
-          materialAddress = alloc(VOXEL_MATERIAL_BYTE_SIZE);
-          write_voxel_material_in_memory(memory, materialAddress, data[i], data[i + 1], data[i + 2]);
+          materialAddress = memory.alloc(SIZEOF_VOXEL_MATERIAL);
+          write_voxel_material_in_memory(memory.memory, materialAddress, data[i], data[i + 1], data[i + 2]);
         }
 
-        write_voxel_octree_material_address_in_memory(
-          memory,
+        allocate_and_write_voxel_material_address_in_memory_of_voxel_octree_at_position(
+          memory.memory,
           voxelOctreeAddress,
           alloc,
           voxelOctreeDepth,

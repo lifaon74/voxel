@@ -1,0 +1,177 @@
+import { u32 } from '@lifaon/math';
+import { draw_texture_3d } from '../texture-3d/draw/draw-texture-3d';
+import { Texture3D } from '../texture-3d/texture-3d.class';
+import { read_u32_be_from_uint8_array } from '../functions/read_u32_be_from_uint8_array';
+
+// import vox from './samples/goxel-test.vox?raw'
+
+/*----------*/
+
+export function import_vox_to_texture_3d(
+  url: URL | string,
+): Promise<Texture3D> {
+  return fetch(url.toString())
+    .then((response: Response) => response.arrayBuffer())
+    .then((buffer: ArrayBuffer) => convert_vox_array_to_texture_3d(new Uint8Array(buffer)));
+}
+
+export function convert_vox_text_to_texture_3d(
+  content: string,
+): Texture3D {
+  return convert_vox_array_to_texture_3d(
+    new TextEncoder().encode(content),
+  );
+}
+
+export function isVOXHeader(
+  array: Uint8Array,
+  index: u32,
+): boolean {
+  return (
+    (array[index] === 0x56 /* V */)
+    && (array[index + 1] === 0x4f /* O */)
+    && (array[index + 2] === 0x58 /* X */)
+    && (array[index + 3] === 0x20 /* SPACE */)
+  );
+}
+
+export const BYTES_READ_FOR_IS_VOX_HEADER = 4;
+
+export function convert_vox_array_to_texture_3d(
+  array: Uint8Array,
+): Texture3D {
+  let index: u32 = 0;
+
+  if (isVOXHeader(array, index)) {
+    index += BYTES_READ_FOR_IS_VOX_HEADER;
+    const version: number = read_u32_be_from_uint8_array(array, index);
+
+    if (version === 150) {
+      index += 4;
+      let chunk: IUnknownVoxChunk;
+
+      [chunk, index] = decode_unknown_vox_chunk(array, index);
+      console.log(array);
+
+      throw 'TODO';
+    } else {
+      throw new Error(`Unsupported version`);
+    }
+  } else {
+    throw new Error(`Not a VOX file`);
+  }
+}
+
+/*----------*/
+
+/* SHARED */
+
+export interface IGenericChunk {
+  id: string;
+  byteOffset: u32;
+  byteLength: u32;
+  childrenByteOffset: u32;
+  childrenByteLength: u32;
+}
+
+export function decode_generic_chunk(
+  array: Uint8Array,
+  index: u32,
+): IGenericChunk {
+  const byteOffset: u32 = index + 12;
+  const byteLength: u32 = read_u32_be_from_uint8_array(array, index + 4);
+  const childrenByteOffset: u32 = byteOffset + byteLength;
+  const childrenByteLength: u32 = read_u32_be_from_uint8_array(array, index + 8);
+
+  return {
+    id: String.fromCodePoint(...array.slice(index, index + 4)),
+    byteOffset,
+    byteLength,
+    childrenByteOffset,
+    childrenByteLength,
+
+  };
+}
+
+/* MAIN */
+
+export interface IMainVoxChunk {
+  type: 'main';
+  children: IUnknownVoxChunk[];
+}
+
+export function convert_generic_chunk_to_main_vox_chunk(
+  chunk: IGenericChunk,
+): IMainVoxChunk {
+  const children: IUnknownVoxChunk[] = [];
+
+  let index: u32 = chunk.childrenByteOffset;
+  const childrenByteEndOffset: u32 = chunk.childrenByteOffset + chunk.childrenByteLength;
+
+  while (index < childrenByteEndOffset) {
+    let childChunk: IUnknownVoxChunk;
+    [childChunk, index] = decode_unknown_vox_chunk(chunk, )
+    children.push(de);
+  }
+}
+
+/* UNKNOWN */
+
+export type IUnknownVoxChunk =
+  | IMainVoxChunk
+  ;
+
+export function convert_generic_chunk_to_unknown_vox_chunk(
+  chunk: IGenericChunk,
+): IUnknownVoxChunk {
+  switch (chunk.id) {
+    case 'MAIN':
+      return convert_generic_chunk_to_main_vox_chunk(chunk);
+    default:
+      throw new Error(`Unknown chunk`);
+  }
+}
+
+export function decode_unknown_vox_chunk(
+  array: Uint8Array,
+  index: u32,
+): [chunk: IUnknownVoxChunk, index: u32] {
+  const chunk: IGenericChunk = decode_generic_chunk(array, index);
+  console.log(chunk);
+  return [
+    convert_generic_chunk_to_unknown_vox_chunk(chunk),
+    index + chunk.childrenByteOffset + chunk.childrenByteOffset,
+  ];
+}
+
+/*----------*/
+
+function debugTexture3d1() {
+  const red = [255, 0, 0, 255];
+  const green = [0, 255, 0, 255];
+  const blue = [0, 0, 255, 255];
+
+  const texture = new Texture3D(
+    new Uint8ClampedArray([
+      ...red, ...red,
+      ...green, ...green,
+      ...green, ...blue,
+      ...green, ...red,
+    ]),
+    2, 2, 2,
+  );
+
+  console.log(draw_texture_3d(texture));
+}
+
+async function debugTexture3d2() {
+  const texture = await import_vox_to_texture_3d(new URL('./samples/goxel-test.vox?raw', import.meta.url));
+  console.log(texture);
+}
+
+/*--------------------------*/
+
+export async function debugTexture3d() {
+  // debugTexture3d1();
+  await debugTexture3d2();
+}

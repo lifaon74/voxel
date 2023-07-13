@@ -1,60 +1,85 @@
-import { displayVoxelOctreeSlice } from '../draw-voxels/display-voxel-octree-slice';
-import { sliceOctreeUsingReadVoxel } from '../draw-voxels/slice/slice-octree-using-read-voxel';
-import { createVoxelMaterial } from '../material/create-voxel-material';
-import { createMemoryAllocator } from '../memory/memory-allocator';
-import { IMemoryPointer } from '../memory/memory-pointer';
-import { memoryAllocatorLog } from '../memory/operations/memory-allocator-log';
-import { get_amount_of_memory_used_by_voxel_octree } from '../octree/functions/get-used-memory/get-amount-of-memory-used-by-voxel-octree';
-import { get_voxel_octree_depth_from_side } from '../octree/functions/misc/get-voxel-octree-depth-from-side';
+import { vec3_from_values_u32 } from '@lifaon/math';
+import { display_voxel_octree_slice } from '../draw-voxels/display_voxel_octree_slice';
+import { slice_octree_using_read_voxel } from '../draw-voxels/slice/slice_octree_using_read_voxel';
+import { allocate_and_write_voxel_material_in_memory } from '../voxel/material/functions/allocate/allocate_and_write_voxel_material_in_memory';
+import { create_memory_alloc_function } from '../voxel/memory/functions/alloc/create_memory_alloc_function';
+import { create_memory_from_size } from '../voxel/memory/functions/create/create_memory_from_size';
+import { print_dynamic_memory } from '../voxel/memory/functions/print/print_dynamic_memory';
+import { IMemoryAddress } from '../voxel/memory/types/memory-address.type';
+import { allocate_and_write_voxel_octree_in_memory } from '../voxel/octree/functions/allocate/allocate_and_write_voxel_octree_in_memory';
+import { voxel_octree_side_to_depth } from '../voxel/octree/functions/depth-side/voxel_octree_side_to_depth';
+import { get_amount_of_memory_used_by_voxel_octree } from '../voxel/octree/functions/get-used-memory/get_amount_of_memory_used_by_voxel_octree';
 import {
-  get_maximum_amount_of_memory_used_by_a_voxel_octree_from_depth
-} from '../octree/functions/get-used-memory/get-maximum-amount-of-memory-used-by-a-voxel-octree-from-depth';
-import {
-  write_voxel_octree_material_address_in_memory,
-} from '../octree/functions/operations/write-voxel-octree-material-address-in-memory';
-import { createVoxelOctree } from '../octree/voxel-octree.type';
+  allocate_and_write_voxel_material_address_in_memory_of_voxel_octree_at_position,
+} from '../voxel/octree/functions/voxel-material/at-position/allocate_and_write_voxel_material_address_in_memory_of_voxel_octree_at_position';
+import { NO_MATERIAL } from '../voxel/octree/special-addresses.constant';
+import { generateRainbowVoxelOctree } from './generate/generate-rainbow-voxel-octree';
 
 function debugVoxel1() {
-  const { getBuffer, alloc } = createMemoryAllocator((2 ** 30) - 1);
-  const MEMORY = new Uint8Array(getBuffer());
+  const memory = create_memory_from_size((2 ** 30) - 1);
+  const alloc = create_memory_alloc_function(memory);
 
-  createVoxelMaterial(MEMORY, alloc, 255, 0, 0);
-  createVoxelMaterial(MEMORY, alloc, 0, 255, 0);
+  const redVoxelMaterialAddress = allocate_and_write_voxel_material_in_memory(memory, alloc, 255, 0, 0);
+  const greenVoxelMaterialAddress = allocate_and_write_voxel_material_in_memory(memory, alloc, 0, 255, 0);
+  const blueVoxelMaterialAddress = allocate_and_write_voxel_material_in_memory(memory, alloc, 0, 0, 255);
 
-  createVoxelOctree(MEMORY, alloc, get_voxel_octree_depth_from_side(2));
+  const voxelOctreeDepth = voxel_octree_side_to_depth(4);
+  const voxelOctreeAddress = allocate_and_write_voxel_octree_in_memory(memory, alloc, redVoxelMaterialAddress);
 
-  console.log(MEMORY);
+  allocate_and_write_voxel_material_address_in_memory_of_voxel_octree_at_position(
+    memory, alloc, voxelOctreeAddress, voxelOctreeDepth, vec3_from_values_u32(0, 0, 0), greenVoxelMaterialAddress,
+  );
+
+  allocate_and_write_voxel_material_address_in_memory_of_voxel_octree_at_position(
+    memory, alloc, voxelOctreeAddress, voxelOctreeDepth, vec3_from_values_u32(2, 2, 0), blueVoxelMaterialAddress,
+  );
+
+  print_dynamic_memory(memory, alloc);
+  display_voxel_octree_slice(memory, voxelOctreeAddress, voxelOctreeDepth, slice_octree_using_read_voxel(0));
+}
+
+function debugVoxel2() {
+  const memory = create_memory_from_size((2 ** 30) - 1);
+  const alloc = create_memory_alloc_function(memory);
+
+  const voxelOctreeDepth = voxel_octree_side_to_depth(16);
+  const voxelOctreeAddress = allocate_and_write_voxel_octree_in_memory(memory, alloc, NO_MATERIAL);
+
+  console.time('gen');
+  generateRainbowVoxelOctree(
+    memory,
+    alloc,
+    voxelOctreeAddress,
+    voxelOctreeDepth,
+  );
+  console.timeEnd('gen');
+
+  print_dynamic_memory(memory, alloc);
+  display_voxel_octree_slice(memory, voxelOctreeAddress, voxelOctreeDepth, slice_octree_using_read_voxel(0));
 }
 
 function debugVoxelCompactMaterials() {
-  // displayVoxelMaxMemorySize();
+  const voxelOctreeDepth: number = voxel_octree_side_to_depth(4);
+  // const voxelMaxMemorySize: number = get_maximum_amount_of_memory_used_by_a_voxel_octree_from_depth(voxelOctreeDepth)
+  //   + 1000; // extra for materials
 
-  const voxelDepth: number = get_voxel_octree_depth_from_side(8);
-  const voxelMaxMemorySize: number = get_maximum_amount_of_memory_used_by_a_voxel_octree_from_depth(voxelDepth)
-    + 1000; // extra for materials
+  const memory = create_memory_from_size((2 ** 30) - 1);
+  const alloc = create_memory_alloc_function(memory);
 
-  const memoryAllocator = createMemoryAllocator(voxelMaxMemorySize);
-  const { getBuffer, alloc } = memoryAllocator;
-  const MEMORY = new Uint8Array(getBuffer());
+  const redVoxelMaterialAddress = allocate_and_write_voxel_material_in_memory(memory, alloc, 255, 0, 0);
+  const greenVoxelMaterialAddress = allocate_and_write_voxel_material_in_memory(memory, alloc, 0, 255, 0);
+  const blueVoxelMaterialAddress = allocate_and_write_voxel_material_in_memory(memory, alloc, 0, 0, 255);
 
-  const redMaterial = createVoxelMaterial(MEMORY, alloc, 255, 0, 0);
-  const material1 = createVoxelMaterial(MEMORY, alloc, 123, 0, 0);
-  const material2 = createVoxelMaterial(MEMORY, alloc, 123, 0, 0);
-  const material3 = createVoxelMaterial(MEMORY, alloc, 0, 42, 0);
-  const material4 = createVoxelMaterial(MEMORY, alloc, 0, 0, 0);
+  const voxelOctreeAddress = allocate_and_write_voxel_octree_in_memory(memory, alloc, NO_MATERIAL);
 
-  const voxel = createVoxelOctree(MEMORY, alloc, voxelDepth);
-
-  const writeVoxel = (x: number, y: number, z: number, material: IMemoryPointer) => {
-    write_voxel_octree_material_address_in_memory(
-      voxel.pointer.memory,
-      voxel.pointer.address,
+  const writeVoxel = (x: number, y: number, z: number, voxelMaterialAddress: IMemoryAddress) => {
+    allocate_and_write_voxel_material_address_in_memory_of_voxel_octree_at_position(
+      memory,
       alloc,
-      voxel.depth,
-      x,
-      y,
-      z,
-      material.address,
+      voxelOctreeAddress,
+      voxelOctreeDepth,
+      vec3_from_values_u32(x, y, z),
+      voxelMaterialAddress,
     );
   };
 
@@ -63,12 +88,12 @@ function debugVoxelCompactMaterials() {
   // };
   //
   const drawDuplicateMaterials = () => {
-    writeVoxel(0, 0, 0, material1);
-    writeVoxel(0, 1, 0, material1);
-    writeVoxel(1, 0, 0, material2);
-    writeVoxel(2, 0, 0, material2);
-    writeVoxel(3, 0, 0, material3);
-    writeVoxel(0, 0, 1, material4);
+    writeVoxel(0, 0, 0, redVoxelMaterialAddress);
+    writeVoxel(0, 1, 0, redVoxelMaterialAddress);
+    writeVoxel(1, 0, 0, greenVoxelMaterialAddress);
+    writeVoxel(2, 0, 0, greenVoxelMaterialAddress);
+    writeVoxel(3, 0, 0, blueVoxelMaterialAddress);
+    writeVoxel(2, 1, 0, blueVoxelMaterialAddress);
   };
 
   // const drawUniformMaterials = () => {
@@ -99,16 +124,14 @@ function debugVoxelCompactMaterials() {
   // drawRainbowCube();
   // drawToDebugUnreachableVoxels();
 
-
-  memoryAllocatorLog(memoryAllocator, 'memory');
-  displayVoxelOctreeSlice(voxel, sliceOctreeUsingReadVoxel(0));
-
+  print_dynamic_memory(memory, alloc);
+  display_voxel_octree_slice(memory, voxelOctreeAddress, voxelOctreeDepth, slice_octree_using_read_voxel(0));
 
   function debugOctreeSize() {
     const octreeSize: number = get_amount_of_memory_used_by_voxel_octree(
-      voxel.pointer.memory,
-      voxel.pointer.address,
-      new Uint8Array(voxel.pointer.memory.length),
+      memory,
+      voxelOctreeAddress,
+      new Uint8Array(memory.byteLength),
     );
     console.log('octreeSize', octreeSize);
   }
@@ -159,5 +182,6 @@ function debugVoxelCompactMaterials() {
 
 export async function debugVoxel() {
   // debugVoxel1();
-  debugVoxelCompactMaterials();
+  debugVoxel2();
+  // debugVoxelCompactMaterials();
 }

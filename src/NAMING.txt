@@ -1,10 +1,10 @@
 
 <memory>: UInt8Array
 
-<voxel_octree>: represents a shape composed of many voxels in a <memory>
+<voxelOctree>: represents a shape composed of many voxels in a <memory>
   [is-child-voxel-octree: 0b{#0, #1, #2, ...}, <voxelOctreeChildAddress>#0 (32b), <voxelOctreeChildAddress>#1 (32b), ...]
 
-<voxel_octree_address>
+<voxelOctreeAddress>
 <voxelOctreeDepth>: the depth of a <voxelOctree>
 <voxelOctreeSide>: the side of a <voxelOctree>
 <voxelOctreeChildAddress>: the address of a child of a <voxelOctree>
