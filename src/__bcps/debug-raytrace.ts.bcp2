@@ -1,0 +1,255 @@
+import {
+  u16,
+  u32,
+  u8,
+  vec3,
+  vec3_create,
+  vec3_from_values,
+  vec4,
+  vec4_create,
+  vec3_subtract,
+  vec3_copy,
+  mat4,
+  mat4_from_translation,
+  mat4_create,
+  mat4_scale,
+  vec3_transform_mat4,
+  mat4_translate,
+  readonly_mat4,
+  mat4_ortho_webgpu,
+  mat4_multiply,
+  mat4_perspective_webgpu, mat4_invert, mat4_look_at, mat4_epsilon_equals,
+} from '@lifaon/math';
+import { create_canvas_context } from '../draw-voxels/create_canvas_context';
+import { display_voxel_octree_slice } from '../draw-voxels/display_voxel_octree_slice';
+import { slice_octree_using_read_voxel } from '../draw-voxels/slice/slice_octree_using_read_voxel';
+import { create_memory_alloc_function } from '../voxel/memory/functions/alloc/create_memory_alloc_function';
+import { create_memory_from_size } from '../voxel/memory/functions/create/create_memory_from_size';
+import { print_dynamic_memory } from '../voxel/memory/functions/print/print_dynamic_memory';
+import { IMemory } from '../voxel/memory/memory.type';
+import { IMemoryAddress } from '../voxel/memory/types/memory-address.type';
+import { allocate_and_write_voxel_octree_in_memory } from '../voxel/octree/functions/allocate/allocate_and_write_voxel_octree_in_memory';
+import { voxel_octree_side_to_depth } from '../voxel/octree/functions/depth-side/voxel_octree_side_to_depth';
+import { NO_MATERIAL } from '../voxel/octree/special-addresses.constant';
+import {
+  get_intersection_point_3d_of_ray_3d_with_voxel_octree,
+} from '../voxel/raytrace/functions/get_intersection_point_3d_of_ray_3d_with_voxel_octree';
+import { generateRainbowVoxelOctree } from './generate/generate-rainbow-voxel-octree';
+import { FreeViewMatrix } from '../camera/free-camera';
+import { createAnimationFrameLoop } from '@lirx/utils';
+
+// MVP => https://jsantell.com/model-view-projection/#:~:text=The%20model%2C%20view%2C%20and%20projection,coordinates%20via%20implicit%20perspective%20division.
+// NDC => https://carmencincotti.com/2022-05-02/homogeneous-coordinates-clip-space-ndc/
+
+/*
+ https://testbook.com/maths/matrix-multiplication#:~:text=Matrix%20Multiplication%20by%20Scalar%20Quantity&text=Formula%20and%20notation%20for%20scalar,scalar%20multiplication%20of%20the%20matrices.
+http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/
+
+ Matrix:
+   Commutative Property: AB≠BA (Matrix multiplication is generally not commutative).
+   Associative Property: (AB)C=A(BC), (Matrix multiplication is Associative in Nature).
+   Distributive Property: A(B+C)=AB+AC, (Distributive law).
+   Multiplicative Identity Property: IA=A=AI, where I is the identity matrix for matrix multiplication.
+   Product with Scalar: x(AB)=(xA)B=A(Bx), such that x is a scalar.
+   Transpose of product of matrices: (AB)T=BTAT
+   , where T denotes the transpose of a matrix.
+   If AB=AC≠B=C
+   ,(Cancellation law is not applicable).
+   Complex conjugate in the multiplication of 2 matrices is written as; (AB)∗=B∗A∗
+   .
+   If AB=0, it does not mean that A=0 or B=0.
+   The product of two non-zero matrices may be a zero matrix.
+
+ Inverse:
+   (A^-1)^-1 = A
+   (A*B)^-1 = B^-1 * A^-1
+  */
+
+function render(
+  imageData: ImageData,
+  // VOXEL_OCTREE
+  memory: IMemory,
+  voxelOctreeAddress: IMemoryAddress,
+  voxelOctreeDepth: u8,
+  mvpi: readonly_mat4,
+): ImageData {
+
+  const rayStartPointInNDCSpace: vec3 = vec3_from_values(0, 0, 0);
+  const rayEndPointInNDCSpace: vec3 = vec3_from_values(0, 0, 1);
+
+  const width: u16 = imageData.width;
+  const widthM1: u16 = width - 1;
+  const height: u16 = imageData.height;
+  const heightM1: u16 = height - 1;
+  const hitPoint: vec3 = vec3_create();
+  const rayStartPoint: vec3 = vec3_create();
+  const rayEndPoint: vec3 = vec3_create();
+  const color: vec4 = vec4_create();
+
+  let i: u32 = 0;
+  for (let y: u16 = 0; y < height; y++) {
+    rayStartPointInNDCSpace[1] = rayEndPointInNDCSpace[1] = -(((2 * y) - heightM1) / height); // negate because y axis of Image data is opposite of viewport
+
+    for (let x: u16 = 0; x < width; x++) {
+      rayStartPointInNDCSpace[0] = rayEndPointInNDCSpace[0] = ((2 * x) - widthM1) / width;
+
+      vec3_transform_mat4(rayStartPoint, rayStartPointInNDCSpace, mvpi);
+      vec3_transform_mat4(rayEndPoint, rayEndPointInNDCSpace, mvpi);
+
+      // console.log(
+      //   rayStartPoint,
+      //   rayEndPoint,
+      // );
+
+      // console.log(
+      //   rayStartPointInNDCSpace,
+      //   rayEndPointInNDCSpace,
+      // );
+
+      // debugger;
+      const material = get_intersection_point_3d_of_ray_3d_with_voxel_octree(
+        hitPoint,
+        rayStartPoint,
+        rayEndPoint,
+        memory,
+        voxelOctreeAddress,
+        voxelOctreeDepth,
+      );
+
+      // break;
+      if (material === NO_MATERIAL) {
+        color[0] = 0;
+        color[1] = 0;
+        color[2] = 0;
+        color[3] = 0;
+      } else {
+        color[0] = memory[material] / 255;
+        color[1] = memory[material + 1] / 255;
+        color[2] = memory[material + 2] / 255;
+        color[3] = 1;
+      }
+
+      imageData.data[i++] = color[0] * 255;
+      imageData.data[i++] = color[1] * 255;
+      imageData.data[i++] = color[2] * 255;
+      imageData.data[i++] = color[3] * 255;
+    }
+  }
+
+  return imageData;
+}
+
+function debugRayTrace1() {
+  const memory = create_memory_from_size((2 ** 30) - 1);
+  const alloc = create_memory_alloc_function(memory);
+
+  const voxelOctreeDepth = voxel_octree_side_to_depth(16);
+  const voxelOctreeAddress = allocate_and_write_voxel_octree_in_memory(memory, alloc, NO_MATERIAL);
+
+  console.time('gen');
+  generateRainbowVoxelOctree(
+    memory,
+    alloc,
+    voxelOctreeAddress,
+    voxelOctreeDepth,
+  );
+  console.timeEnd('gen');
+
+  print_dynamic_memory(memory, alloc);
+  display_voxel_octree_slice(memory, voxelOctreeAddress, voxelOctreeDepth, slice_octree_using_read_voxel(0));
+
+  const out = vec3_create();
+  const material = get_intersection_point_3d_of_ray_3d_with_voxel_octree(
+    out,
+    vec3_from_values(0.5, 0.5, -0.5),
+    vec3_from_values(0, 0, 1),
+    memory,
+    voxelOctreeAddress,
+    voxelOctreeDepth,
+  );
+
+  console.log(out);
+
+  if (material !== NO_MATERIAL) {
+    console.log(memory[material], memory[material + 1], memory[material + 2]);
+  }
+}
+
+function debugRayTrace2() {
+  const side = 16;
+
+  const memory = create_memory_from_size((2 ** 30) - 1);
+  const alloc = create_memory_alloc_function(memory);
+
+  const voxelOctreeDepth = voxel_octree_side_to_depth(side);
+  const voxelOctreeAddress = allocate_and_write_voxel_octree_in_memory(memory, alloc, NO_MATERIAL);
+
+  generateRainbowVoxelOctree(
+    memory,
+    alloc,
+    voxelOctreeAddress,
+    voxelOctreeDepth,
+  );
+
+  const windowSize = 32;
+
+  const imageData = new ImageData(windowSize, windowSize);
+  const ctx: CanvasRenderingContext2D = create_canvas_context(imageData.width, imageData.height, 4);
+
+  const free_view = new FreeViewMatrix({ translationSpeed: 5, rotationSpeed: 0.5 }).start();
+
+  // const projection_matrix: mat4 = mat4_ortho_webgpu(
+  //   mat4_create(),
+  //   windowSize * -0.5,
+  //   windowSize * 0.5,
+  //   windowSize * -0.5,
+  //   windowSize * 0.5,
+  //   -100,
+  //   100,
+  // );
+
+  // const projection_matrix: mat4 = mat4_ortho_webgpu(
+  //   mat4_create(),
+  //   -1,
+  //   1,
+  //   -1,
+  //   1,
+  //   -100,
+  //   100,
+  // );
+
+  const projection_matrix: mat4 = mat4_perspective_webgpu(
+    mat4_create(),
+    Math.PI / 2,
+    1,
+    1,
+    // 20,
+    5000,
+    // Number.POSITIVE_INFINITY
+  );
+
+  const view_matrix: mat4 = mat4_look_at(mat4_create(), [0, 0, -side], [0, 0, 0], [0, -1, 0]); // camera is at [0, 0, -side], and look in direction [0, 0, 0] (up is Y axis)
+  // const view_matrix: mat4 = view.matrix;
+  const model_matrix = mat4_create();
+
+  const update = () => {
+    const mvp: mat4 = mat4_create();
+    const mvpi: mat4 = mat4_create();
+
+    mat4_multiply(view_matrix, free_view.matrix, view_matrix)
+    mat4_multiply(mvp, mat4_multiply(mvp, projection_matrix, view_matrix), model_matrix);
+    mat4_invert(mvpi, mvp);
+
+    ctx.putImageData(render(imageData, memory, voxelOctreeAddress, voxelOctreeDepth, mvpi), 0, 0);
+  };
+
+  createAnimationFrameLoop(update);
+  // update();
+}
+
+/*--------------------------*/
+
+export async function debugRayTrace() {
+  // debugRayTrace1();
+  debugRayTrace2();
+}
