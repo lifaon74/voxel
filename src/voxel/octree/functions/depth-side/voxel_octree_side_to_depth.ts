@@ -23,3 +23,13 @@ export function voxel_octree_side_to_depth(
 
   return depth;
 }
+
+
+export function voxel_octree_side_to_depth_loose(
+  voxelOctreeSide: u32,
+): u8 {
+  const o: u8 = 31 - Math.clz32(Math.max(voxelOctreeSide, 2));
+  return (0x1 << o === voxelOctreeSide)
+    ? (o - 1)
+    : o;
+}

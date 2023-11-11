@@ -23,7 +23,8 @@ import { get_exit_point_3d_of_ray_3d_with_cube } from './get_exit_point_3d_of_ra
 import { is_point_on_cube_surface_or_outside } from './is_point_on_cube_surface_or_outside';
 
 const VOXEL_OCTREE_COORDINATES: IVoxelOctreeCoordinates = vec3_create_u16();
-const RAY_POSITION: vec3 = vec3_create();
+const RAY_START_POINT: vec3 = vec3_create();
+const RAY_END_POINT: vec3 = vec3_create();
 
 /**
  * Returns the hit point of a ray and a <voxelOctree>.
@@ -33,8 +34,8 @@ export function get_intersection_point_3d_of_ray_3d_with_voxel_octree(
   // where the ray is hitting this <voxelOctree>
   out: vec3,
   // RAY
-  rayPosition: vec3,
-  rayVector: vec3,
+  rayStartPoint: vec3,
+  rayEndPoint: vec3,
   // VOXEL_OCTREE
   memory: IMemory,
   voxelOctreeAddress: IMemoryAddress,
@@ -44,11 +45,11 @@ export function get_intersection_point_3d_of_ray_3d_with_voxel_octree(
 
   const side: u32 = voxel_octree_depth_to_side(voxelOctreeDepth);
 
-  // get the entry point where the ray enters this <voxelOctree>
+  // gets the entry point where the ray enters this <voxelOctree>
   get_entry_point_3d_of_ray_3d_with_cube(
     out,
-    rayPosition,
-    rayVector,
+    rayStartPoint,
+    rayEndPoint,
     side,
   );
 
@@ -59,13 +60,14 @@ export function get_intersection_point_3d_of_ray_3d_with_voxel_octree(
       convert_entry_or_exit_point_3d_to_voxel_octree_coordinates(
         VOXEL_OCTREE_COORDINATES,
         out,
-        rayVector,
+        rayStartPoint,
+        rayEndPoint,
       );
 
       let localVoxelOctreeAddress: IMemoryAddress = voxelOctreeAddress;
       let localVoxelOctreeDepth: u8 = voxelOctreeDepth;
 
-      // begin reading the <voxelMaterialAddress> located at VOXEL_OCTREE_COORDINATES
+      // begins reading the <voxelMaterialAddress> located at VOXEL_OCTREE_COORDINATES
       while (localVoxelOctreeDepth >= 0) {
         const voxelOctreeChildIndex: u8 = get_voxel_octree_child_index_from_position_3d(
           localVoxelOctreeDepth,
@@ -75,7 +77,7 @@ export function get_intersection_point_3d_of_ray_3d_with_voxel_octree(
         const voxelOctreeChildAddress: IMemoryAddress = read_u32_from_memory(
           memory,
           get_voxel_octree_child_memory_address_from_voxel_octree_child_index(
-            voxelOctreeAddress,
+            localVoxelOctreeAddress,
             voxelOctreeChildIndex,
           ),
         );
@@ -83,7 +85,7 @@ export function get_intersection_point_3d_of_ray_3d_with_voxel_octree(
         if (
           is_voxel_octree_child_index_a_voxel_octree_address(
             memory,
-            voxelOctreeAddress,
+            localVoxelOctreeAddress,
             voxelOctreeChildIndex,
           )
         ) {
@@ -94,28 +96,35 @@ export function get_intersection_point_3d_of_ray_3d_with_voxel_octree(
           //  - we have to find where the ray exits this <voxelOctreeChild>
           //  - repeat with these new coordinates
           if (voxelOctreeChildAddress === NO_MATERIAL) {
-            // get the side of this <voxelOctreeChild>
+            // gets the side of this <voxelOctreeChild>
             const localSide: u32 = 1 << localVoxelOctreeDepth;
 
-            // get the coordinates of this <voxelOctreeChild>
+            // gets the coordinates of this <voxelOctreeChild>
             convert_voxel_octree_coordinates_to_voxel_octree_child_coordinates(
               VOXEL_OCTREE_COORDINATES,
               VOXEL_OCTREE_COORDINATES,
               localSide,
             );
 
-            // get a temporary ray position relative to this <voxelOctreeChild>
+            // gets a temporary ray start point relative to this <voxelOctreeChild>
             vec3_subtract(
-              RAY_POSITION,
-              rayVector,
+              RAY_START_POINT,
+              rayStartPoint,
               VOXEL_OCTREE_COORDINATES,
             );
 
-            // compute where this ray exits this <voxelOctreeChild>
+            // gets a temporary ray end point relative to this <voxelOctreeChild>
+            vec3_subtract(
+              RAY_END_POINT,
+              rayEndPoint,
+              VOXEL_OCTREE_COORDINATES,
+            );
+
+            // computes where this temporary ray exits this <voxelOctreeChild>
             get_exit_point_3d_of_ray_3d_with_cube(
               out,
-              RAY_POSITION,
-              rayVector,
+              RAY_START_POINT,
+              RAY_END_POINT,
               localSide,
             );
 
@@ -123,8 +132,8 @@ export function get_intersection_point_3d_of_ray_3d_with_voxel_octree(
               debugger;
               get_exit_point_3d_of_ray_3d_with_cube(
                 out,
-                RAY_POSITION,
-                rayVector,
+                RAY_START_POINT,
+                RAY_END_POINT,
                 localSide,
               );
               return NO_MATERIAL;
@@ -136,6 +145,8 @@ export function get_intersection_point_3d_of_ray_3d_with_voxel_octree(
               out,
               VOXEL_OCTREE_COORDINATES,
             );
+
+            // TODO check if RAY_START_POINT === RAY_END_POINT
 
             // finally check if the point leaves the voxel
             if (
@@ -158,3 +169,6 @@ export function get_intersection_point_3d_of_ray_3d_with_voxel_octree(
 
   return NO_MATERIAL;
 }
+
+
+

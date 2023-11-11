@@ -1,8 +1,8 @@
 import { u32 } from '@lifaon/math';
 
 export interface ISizeVoxChunk {
-  type: 'size';
-  x: u32;
-  y: u32;
-  z: u32;
+  readonly type: 'size';
+  readonly x: u32;
+  readonly y: u32;
+  readonly z: u32;
 }

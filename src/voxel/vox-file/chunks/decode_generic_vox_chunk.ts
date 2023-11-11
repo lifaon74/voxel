@@ -2,9 +2,9 @@ import { u32 } from '@lifaon/math';
 import { read_u32_be_from_uint8_array } from '../../../functions/read_u32_be_from_uint8_array';
 
 export interface IGenericVoxChunk {
-  id: string;
-  bytes: Uint8Array;
-  childrenBytes: Uint8Array;
+  readonly id: string;
+  readonly bytes: Uint8Array;
+  readonly childrenBytes: Uint8Array;
 }
 
 export function decode_generic_vox_chunk(

@@ -1,9 +1,24 @@
-import { mat4, mat4_create, mat4_identity, mat4_rotate_x, mat4_rotate_y, mat4_translate, MATH_PI, readonly_mat4 } from '@lifaon/math';
-import { createAnimationFrameLoop, createEventListener, IUnsubscribe, mergeUnsubscribeFunctions } from '@lirx/utils';
+import {
+  mat4,
+  mat4_create,
+  mat4_identity,
+  mat4_rotate_x,
+  mat4_rotate_y,
+  mat4_translate,
+  MATH_PI,
+  readonly_mat4,
+  mat4_multiply,
+} from '@lifaon/math';
+import { createAnimationFrameLoop, createEventListener } from '@lirx/utils';
+import { IUnsubscribe, mergeUnsubscribeFunctions } from '@lirx/unsubscribe';
 
 export interface IFreeViewMatrixOptions {
-  translationSpeed?: number; // in space_unit/sec
-  rotationSpeed?: number; // in rad/sec
+  readonly translationSpeed?: number; // in space_unit/sec
+  readonly rotationSpeed?: number; // in turn/sec
+}
+
+export interface IFreeViewMatrixUpdateFunction {
+  (): void;
 }
 
 export class FreeViewMatrix {
@@ -11,17 +26,21 @@ export class FreeViewMatrix {
   readonly #rotationSpeed: number; // in rad/ms
   readonly #matrix: mat4;
   #stop: IUnsubscribe | undefined;
+  #update: IFreeViewMatrixUpdateFunction;
 
   constructor(
     {
       translationSpeed = 1,
-      rotationSpeed = MATH_PI,
+      rotationSpeed = 0.5,
     }: IFreeViewMatrixOptions = {},
   ) {
     this.#translationSpeed = translationSpeed / 1000;
-    this.#rotationSpeed = rotationSpeed / 1000;
+    this.#rotationSpeed = rotationSpeed / 1000 * MATH_PI;
     this.#matrix = mat4_create();
     this.#stop = void 0;
+    this.#update = (): void => {
+      mat4_identity(this.#matrix);
+    };
   }
 
   get matrix(): readonly_mat4 {
@@ -30,6 +49,10 @@ export class FreeViewMatrix {
 
   get started(): boolean {
     return this.#stop !== void 0;
+  }
+
+  get update(): IFreeViewMatrixUpdateFunction {
+    return this.#update;
   }
 
   start(): this {
@@ -59,14 +82,14 @@ export class FreeViewMatrix {
         keyPressed.delete(event.code);
       });
 
-      const update = (): void => {
+      this.#update = (): void => {
         mat4_identity(this.#matrix);
 
         const now: number = Date.now();
         const elapsedTime: number = now - lastUpdateTime;
         lastUpdateTime = now;
 
-        const translationSpeed: number = this.#translationSpeed * elapsedTime;
+        const translationSpeed: number = this.#translationSpeed * elapsedTime * (keyPressed.has('ShiftLeft') ? 3 : 1);
         const rotationSpeed: number = this.#rotationSpeed * elapsedTime;
 
         if (keyPressed.has('KeyW')) {
@@ -92,11 +115,8 @@ export class FreeViewMatrix {
         movementX = 0;
         movementY = 0;
 
-        // mat4.mul(out, view, this.#matrix);
-        // mat4.mul(out, this.#matrix, view);
+        // mat4_multiply(out, this.#matrix, view);
       };
-
-      createAnimationFrameLoop(update);
 
       this.#stop = mergeUnsubscribeFunctions([
         unsubscribeOfClick,
@@ -112,6 +132,9 @@ export class FreeViewMatrix {
     if (this.#stop !== void 0) {
       this.#stop();
       this.#stop = void 0;
+      this.#update = (): void => {
+        mat4_identity(this.#matrix);
+      };
     }
     return this;
   }

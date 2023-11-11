@@ -1,8 +1,8 @@
 import { u8 } from '@lifaon/math';
 
 export interface IRGBAVoxColor {
-  r: u8;
-  g: u8;
-  b: u8;
-  a: u8;
+  readonly r: u8;
+  readonly g: u8;
+  readonly b: u8;
+  readonly a: u8;
 }

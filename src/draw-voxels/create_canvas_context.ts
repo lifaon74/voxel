@@ -1,13 +1,13 @@
 export function create_canvas_context(
   width: number,
   height: number,
+  scale: number,
 ): CanvasRenderingContext2D {
   const ctx: CanvasRenderingContext2D = document.createElement('canvas').getContext('2d') as CanvasRenderingContext2D;
   ctx.canvas.width = width;
   ctx.canvas.height = height;
   document.body.appendChild(ctx.canvas);
 
-  const scale: number = 32;
   ctx.canvas.style.width = `${scale * width}px`;
   ctx.canvas.style.height = `${scale * height}px`;
   ctx.canvas.style.imageRendering = 'pixelated';

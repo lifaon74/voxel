@@ -1,6 +1,6 @@
 import { IXYZIVoxel } from './xyzi-voxel.type';
 
 export interface IXYZIVoxChunk {
-  type: 'xyzi';
-  voxels: IXYZIVoxel[];
+  readonly type: 'xyzi';
+  readonly voxels: readonly IXYZIVoxel[];
 }

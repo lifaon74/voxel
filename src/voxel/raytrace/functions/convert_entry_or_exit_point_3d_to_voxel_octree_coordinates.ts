@@ -9,7 +9,8 @@ export function convert_entry_or_exit_point_3d_to_voxel_octree_coordinates(
   out: IVoxelOctreeCoordinates,
   // the entry/exit point
   point: vec3,
-  rayVector: vec3,
+  rayStartPoint: vec3,
+  rayEndPoint: vec3,
 ): void {
   // intHitPosition[0] = hitPosition[0] - ((rayVector[0] < 0) ? Number.EPSILON : 0);
   // intHitPosition[1] = hitPosition[1] - ((rayVector[1] < 0) ? Number.EPSILON : 0);
@@ -17,7 +18,7 @@ export function convert_entry_or_exit_point_3d_to_voxel_octree_coordinates(
   for (let i: u8 = 0; i < 3; i++) {
     out[i] = point[i]; // cast from f32 to u16
     if (
-      (rayVector[i] < 0)
+      (rayEndPoint[i] < rayStartPoint[i])
       && (out[i] === point[i])
     ) {
       out[i]--;

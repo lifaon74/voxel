@@ -5,6 +5,7 @@ import { convert_generic_vox_chunk_to_size_vox_chunk } from '../size/convert_gen
 import { convert_generic_vox_chunk_to_xyzi_vox_chunk } from '../xyzi/convert_generic_vox_chunk_to_xyzi_vox_chunk';
 
 import { IUnknownVoxChunk } from './unknown-vox-chunk.type';
+import { convert_generic_vox_chunk_to_pack_vox_chunk } from '../pack/convert_generic_vox_chunk_to_pack_vox_chunk';
 
 export function convert_generic_chunk_to_unknown_vox_chunk(
   chunk: IGenericVoxChunk,
@@ -12,6 +13,8 @@ export function convert_generic_chunk_to_unknown_vox_chunk(
   switch (chunk.id) {
     case 'MAIN':
       return convert_generic_vox_chunk_to_main_vox_chunk(chunk);
+    case 'PACK':
+      return convert_generic_vox_chunk_to_pack_vox_chunk(chunk);
     case 'SIZE':
       return convert_generic_vox_chunk_to_size_vox_chunk(chunk);
     case 'XYZI':
@@ -19,6 +22,9 @@ export function convert_generic_chunk_to_unknown_vox_chunk(
     case 'RGBA':
       return convert_generic_vox_chunk_to_rgba_vox_chunk(chunk);
     default:
-      throw new Error(`Unknown chunk`);
+      throw new Error(`Unknown chunk: ${chunk.id}`);
+      // return {
+      //   type: 'unsupported',
+      // };
   }
 }
