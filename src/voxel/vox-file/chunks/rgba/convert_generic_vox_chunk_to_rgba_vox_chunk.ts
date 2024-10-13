@@ -8,11 +8,11 @@ export function convert_generic_vox_chunk_to_rgba_vox_chunk(
   chunk: IGenericVoxChunk,
 ): IRGBAVoxChunk {
   if (chunk.childrenBytes.length !== 0) {
-    throw new Error(`RGBA chunk should not have children content`);
+    throw new Error('RGBA chunk should not have children content');
   }
 
   if (chunk.bytes.length !== 1024) {
-    throw new Error(`RGBA chunk should not have a size of 1024`);
+    throw new Error('RGBA chunk should not have a size of 1024');
   }
 
   const colors: IRGBAVoxColor[] = [];

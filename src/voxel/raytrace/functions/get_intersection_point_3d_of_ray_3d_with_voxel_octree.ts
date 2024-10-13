@@ -1,5 +1,5 @@
 import { is_valid_point, make_point_invalid, u32, u8, vec3, vec3_add, vec3_create, vec3_create_u16, vec3_subtract } from '@lifaon/math';
-import { read_u32_from_memory } from '../../memory/functions/read-write/u32/read_u32_from_memory';
+import { read_u32_be_from_memory } from '../../memory/functions/read-write/u32/read_u32_be_from_memory';
 import { IMemory } from '../../memory/memory.type';
 import { IMemoryAddress } from '../../memory/types/memory-address.type';
 import { voxel_octree_depth_to_side } from '../../octree/functions/depth-side/voxel_octree_depth_to_side';
@@ -74,7 +74,7 @@ export function get_intersection_point_3d_of_ray_3d_with_voxel_octree(
           VOXEL_OCTREE_COORDINATES,
         );
 
-        const voxelOctreeChildAddress: IMemoryAddress = read_u32_from_memory(
+        const voxelOctreeChildAddress: IMemoryAddress = read_u32_be_from_memory(
           memory,
           get_voxel_octree_child_memory_address_from_voxel_octree_child_index(
             localVoxelOctreeAddress,

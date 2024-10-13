@@ -1,6 +1,6 @@
 import { u8, vec3_u32 } from '@lifaon/math';
-import { read_u32_from_memory } from '../../../../memory/functions/read-write/u32/read_u32_from_memory';
-import { write_u32_in_memory } from '../../../../memory/functions/read-write/u32/write_u32_in_memory';
+import { read_u32_be_from_memory } from '../../../../memory/functions/read-write/u32/read_u32_be_from_memory';
+import { write_u32_be_in_memory } from '../../../../memory/functions/read-write/u32/write_u32_be_in_memory';
 import { IMemory } from '../../../../memory/memory.type';
 import { IMemoryAddress } from '../../../../memory/types/memory-address.type';
 import { IMemoryAllocFunction } from '../../../../memory/types/memory-alloc-function.type';
@@ -41,14 +41,14 @@ export function allocate_and_write_voxel_material_address_in_memory_of_voxel_oct
 
     if (voxelOctreeDepth === 0) {
       // for depth === 0 mask should be equals to <voxelMaterialAddress> by default
-      write_u32_in_memory(
+      write_u32_be_in_memory(
         memory,
         voxelOctreeChildAddressAddress,
         voxelMaterialAddress,
       );
       break;
     } else {
-      const voxelOctreeChildAddress: IMemoryAddress = read_u32_from_memory(
+      const voxelOctreeChildAddress: IMemoryAddress = read_u32_be_from_memory(
         memory,
         voxelOctreeChildAddressAddress,
       );
@@ -80,7 +80,7 @@ export function allocate_and_write_voxel_material_address_in_memory_of_voxel_oct
           );
 
           // replace the old <voxelMaterialAddress> with the new <voxelOctreeAddress>
-          write_u32_in_memory(
+          write_u32_be_in_memory(
             memory,
             voxelOctreeChildAddressAddress,
             newVoxelOctreeAddress,

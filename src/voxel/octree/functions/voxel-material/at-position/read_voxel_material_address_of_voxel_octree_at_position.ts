@@ -1,5 +1,5 @@
 import { u8, vec3_u32 } from '@lifaon/math';
-import { read_u32_from_memory } from '../../../../memory/functions/read-write/u32/read_u32_from_memory';
+import { read_u32_be_from_memory } from '../../../../memory/functions/read-write/u32/read_u32_be_from_memory';
 import { IMemory } from '../../../../memory/memory.type';
 import { IMemoryAddress } from '../../../../memory/types/memory-address.type';
 import { IVoxelOctreePosition3d } from '../../../types/voxel-octree-position-3d.type';
@@ -28,7 +28,7 @@ export function read_voxel_material_address_of_voxel_octree_at_position(
       position,
     );
 
-    const voxelOctreeChildAddress: IMemoryAddress = read_u32_from_memory(
+    const voxelOctreeChildAddress: IMemoryAddress = read_u32_be_from_memory(
       memory,
       get_voxel_octree_child_memory_address_from_voxel_octree_child_index(
         voxelOctreeAddress,

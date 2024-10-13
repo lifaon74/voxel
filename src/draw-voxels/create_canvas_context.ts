@@ -1,7 +1,7 @@
 export function create_canvas_context(
   width: number,
   height: number,
-  scale: number,
+  scale: number = 1,
 ): CanvasRenderingContext2D {
   const ctx: CanvasRenderingContext2D = document.createElement('canvas').getContext('2d') as CanvasRenderingContext2D;
   ctx.canvas.width = width;

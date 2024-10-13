@@ -30,9 +30,12 @@ function debugTexture3d1() {
 
 async function debugTexture3d2() {
   // const url = new URL('./samples/goxel-test2.vox?raw', import.meta.url);
-  const url = new URL('./samples/alien_bot1.vox?raw', import.meta.url);
+  // const url = new URL('./samples/alien_bot1.vox?raw', import.meta.url);
+  // const url = new URL('./samples/ephtracy/anim/horse.vox?raw', import.meta.url);
+  const url = new URL('./samples/ephtracy/anim/T-Rex.vox?raw', import.meta.url);
+  // const url = new URL('./samples/ephtracy/monument/monu1.vox?raw', import.meta.url);
   const texture = await import_vox_file_url_into_texture_3d(url);
-  draw_texture_3d(texture);
+  draw_texture_3d(texture, 4);
 }
 
 /*--------------------------*/

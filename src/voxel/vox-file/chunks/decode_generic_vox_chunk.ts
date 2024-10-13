@@ -1,5 +1,12 @@
-import { u32 } from '@lifaon/math';
-import { read_u32_be_from_uint8_array } from '../../../functions/read_u32_be_from_uint8_array';
+import {
+  alloc_u32,
+  AllocFunction,
+  BytesBuffer,
+  char_string,
+  read_char_string_from_bytes_buffer,
+  read_u32_be_from_bytes_buffer, read_uint8_array_from_bytes_buffer,
+  u32
+} from '@lifaon/math';
 
 export interface IGenericVoxChunk {
   readonly id: string;
@@ -8,22 +15,19 @@ export interface IGenericVoxChunk {
 }
 
 export function decode_generic_vox_chunk(
-  bytes: Uint8Array,
-): [chunk: IGenericVoxChunk, remaining: Uint8Array] {
-  const byteLength: u32 = read_u32_be_from_uint8_array(bytes, 4);
-  const byteOffsetStart: u32 = 12;
-  const byteOffsetEnd: u32 = byteOffsetStart + byteLength;
-
-  const childrenByteLength: u32 = read_u32_be_from_uint8_array(bytes, 8);
-  const childrenByteOffsetStart: u32 = byteOffsetEnd;
-  const childrenByteOffsetEnd: u32 = childrenByteOffsetStart + childrenByteLength;
-
-  return [
-    {
-      id: String.fromCodePoint(...bytes.slice(0, 4)),
-      bytes: bytes.subarray(byteOffsetStart, byteOffsetEnd),
-      childrenBytes: bytes.subarray(childrenByteOffsetStart, childrenByteOffsetEnd),
-    },
-    bytes.subarray(childrenByteOffsetEnd),
-  ];
+  buffer: BytesBuffer,
+  alloc: AllocFunction,
+): IGenericVoxChunk {
+  const id: char_string = read_char_string_from_bytes_buffer(buffer, alloc(4), 4);
+  const byteLength: u32 = read_u32_be_from_bytes_buffer(buffer, alloc_u32(alloc));
+  const childrenByteLength: u32 = read_u32_be_from_bytes_buffer(buffer, alloc_u32(alloc));
+  const bytes: Uint8Array = read_uint8_array_from_bytes_buffer(buffer, alloc(byteLength), byteLength);
+  const childrenBytes: Uint8Array = read_uint8_array_from_bytes_buffer(buffer, alloc(childrenByteLength), childrenByteLength);
+  return {
+    id,
+    bytes,
+    childrenBytes,
+  };
 }
+
+

@@ -37,23 +37,29 @@ export function draw_main_vox_chunk_into_set_voxel_color_function(
   };
 
   let numberOfModels: u32;
-  let index: u32;
+  let sizeChunkIndex: u32;
+  let xyziChunkIndex: u32;
+  let rgbaChunkIndex: u32;
 
   if (chunk.children[0].type === 'pack') {
     numberOfModels = chunk.children[0].numberOfModels;
-    index = 1 + modelIndex * 2;
+    sizeChunkIndex = 1 + modelIndex * 2;
+    xyziChunkIndex = sizeChunkIndex + 1;
+    rgbaChunkIndex = 1 + numberOfModels * 2;
   } else {
     numberOfModels = 1;
-    index = 0;
+    sizeChunkIndex = 0;
+    xyziChunkIndex = 1;
+    rgbaChunkIndex = 2;
   }
 
   if (modelIndex >= numberOfModels) {
     throw new Error(`A single model was found`);
   }
 
-  const sizeChunk: ISizeVoxChunk = getChunk<ISizeVoxChunk>('size', index);
-  const xyziChunk: IXYZIVoxChunk = getChunk<IXYZIVoxChunk>('xyzi', index + 1);
-  const rgbaChunk: IRGBAVoxChunk | undefined = getOptionalChunk<IRGBAVoxChunk>('rgba', index + 2);
+  const sizeChunk: ISizeVoxChunk = getChunk<ISizeVoxChunk>('size', sizeChunkIndex);
+  const xyziChunk: IXYZIVoxChunk = getChunk<IXYZIVoxChunk>('xyzi', xyziChunkIndex);
+  const rgbaChunk: IRGBAVoxChunk | undefined = getOptionalChunk<IRGBAVoxChunk>('rgba', rgbaChunkIndex);
 
   setVoxelSizeFunction(
     sizeChunk.x,

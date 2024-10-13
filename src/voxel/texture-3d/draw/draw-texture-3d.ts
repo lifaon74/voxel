@@ -34,7 +34,8 @@ export function convert_texture_3d_to_image_data_slices(
 
 export function draw_texture_3d(
   texture3d: Texture3D,
+  scale?: number,
 ): void {
-  draw_image_data(convert_texture_3d_to_image_data_slices(texture3d));
+  draw_image_data(convert_texture_3d_to_image_data_slices(texture3d), scale);
 }
 

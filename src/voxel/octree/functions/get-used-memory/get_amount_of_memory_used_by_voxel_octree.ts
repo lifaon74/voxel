@@ -2,7 +2,7 @@ import { u32, u8 } from '@lifaon/math';
 import { SIZEOF_VOXEL_MATERIAL } from '../../../material/constants/sizeof_voxel_material.constant';
 import { IMemoryAddress } from '../../../memory/types/memory-address.type';
 import { IMemory } from '../../../memory/memory.type';
-import { read_u32_from_memory } from '../../../memory/functions/read-write/u32/read_u32_from_memory';
+import { read_u32_be_from_memory } from '../../../memory/functions/read-write/u32/read_u32_be_from_memory';
 import { SIZEOF_U32 } from '../../../memory/functions/read-write/u32/sizeof_u32.constant';
 import { NO_MATERIAL } from '../../special-addresses.constant';
 import { SIZEOF_VOXEL_OCTREE } from '../../constants/sizeof_voxel_octree.constant';
@@ -23,7 +23,7 @@ export function get_amount_of_memory_used_by_voxel_octree(
     let size: u32 = SIZEOF_VOXEL_OCTREE;
     let voxelOctreeChildAddressAddress: IMemoryAddress = voxelOctreeAddress + 1;
     for (let i: u8 = 0; i < 8; i++) {
-      const voxelOctreeChildAddress: IMemoryAddress = read_u32_from_memory(
+      const voxelOctreeChildAddress: IMemoryAddress = read_u32_be_from_memory(
         memory,
         voxelOctreeChildAddressAddress,
       );

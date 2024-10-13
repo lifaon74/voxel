@@ -2,7 +2,10 @@ import { u32 } from '@lifaon/math';
 import { IMemoryAddress } from '../../../types/memory-address.type';
 import { IMemory } from '../../../memory.type';
 
-export function read_u32_from_memory(
+/**
+ * @deprecated use @lifaon/math
+ */
+export function read_u32_be_from_memory(
   memory: IMemory,
   address: IMemoryAddress,
 ): u32 {

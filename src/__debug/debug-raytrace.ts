@@ -184,6 +184,7 @@ async function debugRayTrace2() {
 
   const createAlienBotVoxelOctree = async (): Promise<VoxelOctree> => {
     // const url = new URL('./samples/alien_bot1.vox?raw', import.meta.url);
+    // const url = new URL('./samples/ephtracy/anim/T-Rex.vox?raw', import.meta.url);
     // const url = new URL('./samples/ephtracy/monument/monu6-without-water.vox?raw', import.meta.url);
     // const url = new URL('./samples/ephtracy/monument/monu5.vox?raw', import.meta.url);
     // const url = new URL('./samples/ephtracy/monument/monu10.vox?raw', import.meta.url);
