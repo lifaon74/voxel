@@ -1,8 +1,8 @@
-import { readonly_vec3, vec3, vec3_create, vec3_transform_mat4, vec3_copy } from '@lifaon/math';
-import { IVoxelOctreeIn3dSpace } from '../../../objects/voxel-octree/voxel-octree-in-3d-space.type';
-import { NO_MATERIAL } from '../../octree/special-addresses.constant';
-import { IMemoryAddress } from '../../memory/types/memory-address.type';
+import { readonly_vec3, vec3, vec3_copy, vec3_create, vec3_transform_mat4 } from '@lifaon/math';
 import { vec3_transform_mat4_z } from '../../../functions/vec3_transform_mat4_z';
+import { IVoxelOctreeIn3dSpace } from '../../../objects/voxel-octree/voxel-octree-in-3d-space.type';
+import { IMemoryAddress } from '../../memory/types/memory-address.type';
+import { NO_MATERIAL } from '../../octree/special-addresses.constant';
 import { get_intersection_point_3d_of_ray_3d_with_voxel_octree } from './get_intersection_point_3d_of_ray_3d_with_voxel_octree';
 
 export interface IGetIntersectionPoint3dOfRay3dWithManyVoxelOctreesResult {
@@ -30,17 +30,22 @@ export function get_intersection_point_3d_of_ray_3d_with_many_voxel_octrees(
   for (let i = 0, l = voxelOctreesIn3dSpace.length; i < l; i++) {
     const voxelOctreeIn3dSpace: IVoxelOctreeIn3dSpace = voxelOctreesIn3dSpace[i];
 
-    vec3_transform_mat4(rayStartPointInVoxelSpace, rayStartPointInNDCSpace, voxelOctreeIn3dSpace.mvpi);
+    vec3_transform_mat4(
+      rayStartPointInVoxelSpace,
+      rayStartPointInNDCSpace,
+      voxelOctreeIn3dSpace.mvpi,
+    );
     vec3_transform_mat4(rayEndPointInVoxelSpace, rayEndPointInNDCSpace, voxelOctreeIn3dSpace.mvpi);
 
-    const tempVoxelMaterialAddress: IMemoryAddress = get_intersection_point_3d_of_ray_3d_with_voxel_octree(
-      tempHitPointInVoxelSpace,
-      rayStartPointInVoxelSpace,
-      rayEndPointInVoxelSpace,
-      voxelOctreeIn3dSpace.memory,
-      voxelOctreeIn3dSpace.address,
-      voxelOctreeIn3dSpace.depth,
-    );
+    const tempVoxelMaterialAddress: IMemoryAddress =
+      get_intersection_point_3d_of_ray_3d_with_voxel_octree(
+        tempHitPointInVoxelSpace,
+        rayStartPointInVoxelSpace,
+        rayEndPointInVoxelSpace,
+        voxelOctreeIn3dSpace.memory,
+        voxelOctreeIn3dSpace.address,
+        voxelOctreeIn3dSpace.depth,
+      );
 
     if (tempVoxelMaterialAddress !== NO_MATERIAL) {
       const z: number = vec3_transform_mat4_z(tempHitPointInVoxelSpace, voxelOctreeIn3dSpace.mvp);
@@ -60,5 +65,3 @@ export function get_intersection_point_3d_of_ray_3d_with_many_voxel_octrees(
     hitPointInVoxelSpace,
   };
 }
-
-

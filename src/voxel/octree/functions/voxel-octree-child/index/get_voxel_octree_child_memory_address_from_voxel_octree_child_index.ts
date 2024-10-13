@@ -9,6 +9,8 @@ export function get_voxel_octree_child_memory_address_from_voxel_octree_child_in
   voxelOctreeAddress: IMemoryAddress,
   voxelOctreeChildIndex: u8,
 ): IMemoryAddress {
-  return voxelOctreeAddress
-    + get_memory_address_offset_from_voxel_octree_child_index(voxelOctreeChildIndex);
+  return (
+    voxelOctreeAddress +
+    get_memory_address_offset_from_voxel_octree_child_index(voxelOctreeChildIndex)
+  );
 }

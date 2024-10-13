@@ -1,22 +1,22 @@
 import {
-  vec4,
-  vec3,
   readonly_mat4,
+  vec3,
   vec3_clone,
   vec3_create,
-  vec3_transform_mat4,
   vec3_scale_and_add,
   vec3_squared_length,
+  vec3_transform_mat4,
+  vec4,
 } from '@lifaon/math';
-import { IVoxelOctreeIn3dSpace } from '../../objects/voxel-octree/voxel-octree-in-3d-space.type';
-import { IRadialLightIn3dSpace } from '../../objects/light/radial-light-in-3d-space.type';
-import { IReadonlyLightSpectrum, ILightSpectrum } from '../../objects/light/light-spectrum.type';
-import { NO_MATERIAL } from '../../voxel/octree/special-addresses.constant';
 import { null_vec3_transform_mat4 } from '../../functions/null_vec3_transform_mat4';
+import { ILightSpectrum, IReadonlyLightSpectrum } from '../../objects/light/light-spectrum.type';
+import { IRadialLightIn3dSpace } from '../../objects/light/radial-light-in-3d-space.type';
+import { IVoxelOctreeIn3dSpace } from '../../objects/voxel-octree/voxel-octree-in-3d-space.type';
+import { NO_MATERIAL } from '../../voxel/octree/special-addresses.constant';
 import { can_ray_3d_reach_light_through_many_voxel_octrees } from '../../voxel/raytrace/functions/can_ray_3d_reach_light_through_many_voxel_octrees';
 import {
-  IGetIntersectionPoint3dOfRay3dWithManyVoxelOctreesResult,
   get_intersection_point_3d_of_ray_3d_with_many_voxel_octrees,
+  IGetIntersectionPoint3dOfRay3dWithManyVoxelOctreesResult,
 } from '../../voxel/raytrace/functions/get_intersection_point_3d_of_ray_3d_with_many_voxel_octrees';
 
 export function get_resulting_color_of_ray_3d_with_many_voxel_octrees_and_many_lights(
@@ -27,13 +27,14 @@ export function get_resulting_color_of_ray_3d_with_many_voxel_octrees_and_many_l
   rayStartPointInNDCSpace: vec3,
   rayEndPointInNDCSpace: vec3,
 ): void {
-  const result: IGetIntersectionPoint3dOfRay3dWithManyVoxelOctreesResult = get_intersection_point_3d_of_ray_3d_with_many_voxel_octrees(
-    voxelOctreesIn3dSpace,
-    rayStartPointInNDCSpace,
-    rayEndPointInNDCSpace,
-  );
+  const result: IGetIntersectionPoint3dOfRay3dWithManyVoxelOctreesResult =
+    get_intersection_point_3d_of_ray_3d_with_many_voxel_octrees(
+      voxelOctreesIn3dSpace,
+      rayStartPointInNDCSpace,
+      rayEndPointInNDCSpace,
+    );
 
-  if ((result.index === -1) || (result.voxelMaterialAddress === NO_MATERIAL)) {
+  if (result.index === -1 || result.voxelMaterialAddress === NO_MATERIAL) {
     color[0] = 0;
     color[1] = 0;
     color[2] = 0;
@@ -70,7 +71,12 @@ export function get_resulting_color_of_ray_3d_with_many_voxel_octrees_and_many_l
       if (!hit) {
         const hitPointInLightSpace: vec3 = vec3_create();
         vec3_transform_mat4(hitPointInLightSpace, hitPointInNDCSpace, lightMVPI);
-        vec3_scale_and_add(lightSpectrum, lightSpectrum, light.spectrum, 1 / vec3_squared_length(hitPointInLightSpace));
+        vec3_scale_and_add(
+          lightSpectrum,
+          lightSpectrum,
+          light.spectrum,
+          1 / vec3_squared_length(hitPointInLightSpace),
+        );
       }
     }
 

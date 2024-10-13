@@ -1,6 +1,6 @@
 import { u8 } from '@lifaon/math';
-import { IMemoryAddress } from '../../../memory/types/memory-address.type';
 import { IMemory } from '../../../memory/memory.type';
+import { IMemoryAddress } from '../../../memory/types/memory-address.type';
 
 export function write_voxel_material_in_memory(
   memory: IMemory,

@@ -7,10 +7,9 @@ import {
   mat4_translate,
   MATH_PI,
   readonly_mat4,
-  mat4_multiply,
 } from '@lifaon/math';
-import { createAnimationFrameLoop, createEventListener } from '@lirx/utils';
 import { IUnsubscribe, mergeUnsubscribeFunctions } from '@lirx/unsubscribe';
+import { createEventListener } from '@lirx/utils';
 
 export interface IFreeViewMatrixOptions {
   readonly translationSpeed?: number; // in space_unit/sec
@@ -28,14 +27,9 @@ export class FreeViewMatrix {
   #stop: IUnsubscribe | undefined;
   #update: IFreeViewMatrixUpdateFunction;
 
-  constructor(
-    {
-      translationSpeed = 1,
-      rotationSpeed = 0.5,
-    }: IFreeViewMatrixOptions = {},
-  ) {
+  constructor({ translationSpeed = 1, rotationSpeed = 0.5 }: IFreeViewMatrixOptions = {}) {
     this.#translationSpeed = translationSpeed / 1000;
-    this.#rotationSpeed = rotationSpeed / 1000 * MATH_PI;
+    this.#rotationSpeed = (rotationSpeed / 1000) * MATH_PI;
     this.#matrix = mat4_create();
     this.#stop = void 0;
     this.#update = (): void => {
@@ -68,15 +62,23 @@ export class FreeViewMatrix {
         }
       });
 
-      const unsubscribeOfPointerMove = createEventListener(window, 'pointermove', (event: PointerEvent): void => {
-        movementX += event.movementX;
-        movementY += event.movementY;
-      });
+      const unsubscribeOfPointerMove = createEventListener(
+        window,
+        'pointermove',
+        (event: PointerEvent): void => {
+          movementX += event.movementX;
+          movementY += event.movementY;
+        },
+      );
 
-      const unsubscribeOfKeyDown = createEventListener(window, 'keydown', (event: KeyboardEvent) => {
-        // console.log(event.code);
-        keyPressed.add(event.code);
-      });
+      const unsubscribeOfKeyDown = createEventListener(
+        window,
+        'keydown',
+        (event: KeyboardEvent) => {
+          // console.log(event.code);
+          keyPressed.add(event.code);
+        },
+      );
 
       const unsubscribeOfKeyUp = createEventListener(window, 'keyup', (event: KeyboardEvent) => {
         keyPressed.delete(event.code);
@@ -89,7 +91,8 @@ export class FreeViewMatrix {
         const elapsedTime: number = now - lastUpdateTime;
         lastUpdateTime = now;
 
-        const translationSpeed: number = this.#translationSpeed * elapsedTime * (keyPressed.has('ShiftLeft') ? 3 : 1);
+        const translationSpeed: number =
+          this.#translationSpeed * elapsedTime * (keyPressed.has('ShiftLeft') ? 3 : 1);
         const rotationSpeed: number = this.#rotationSpeed * elapsedTime;
 
         if (keyPressed.has('KeyW')) {

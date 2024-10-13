@@ -1,16 +1,16 @@
-import { u8, vec3_u32 } from '@lifaon/math';
+import { u8 } from '@lifaon/math';
 import { read_u32_be_from_memory } from '../../../../memory/functions/read-write/u32/read_u32_be_from_memory';
 import { IMemory } from '../../../../memory/memory.type';
 import { IMemoryAddress } from '../../../../memory/types/memory-address.type';
 import { IVoxelOctreePosition3d } from '../../../types/voxel-octree-position-3d.type';
 import {
-  get_voxel_octree_child_index_from_position_3d,
+  get_voxel_octree_child_index_from_position_3d
 } from '../../voxel-octree-child/index/get_voxel_octree_child_index_from_position_3d';
 import {
-  get_voxel_octree_child_memory_address_from_voxel_octree_child_index,
+  get_voxel_octree_child_memory_address_from_voxel_octree_child_index
 } from '../../voxel-octree-child/index/get_voxel_octree_child_memory_address_from_voxel_octree_child_index';
 import {
-  is_voxel_octree_child_index_a_voxel_octree_address,
+  is_voxel_octree_child_index_a_voxel_octree_address
 } from '../../voxel-octree-child/index/is_voxel_octree_child_index_a_voxel_octree_address';
 
 /**

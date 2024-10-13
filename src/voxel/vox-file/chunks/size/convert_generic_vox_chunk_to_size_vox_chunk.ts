@@ -1,4 +1,9 @@
-import { alloc_u32, AllocFunction, create_alloc_function_for_bytes_buffer, read_u32_be_from_bytes_buffer } from '@lifaon/math';
+import {
+  alloc_u32,
+  AllocFunction,
+  create_alloc_function_for_bytes_buffer,
+  read_u32_be_from_bytes_buffer,
+} from '@lifaon/math';
 import { IGenericVoxChunk } from '../decode_generic_vox_chunk';
 import { ISizeVoxChunk } from './size-vox-chunk.type';
 

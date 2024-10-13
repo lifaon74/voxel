@@ -1,10 +1,8 @@
-import { IVoxelOctreeIn3dSpace } from '../../objects/voxel-octree/voxel-octree-in-3d-space.type';
-import { IRadialLightIn3dSpace } from '../../objects/light/radial-light-in-3d-space.type';
+import { u16, u32, vec3, vec3_from_values, vec4, vec4_create } from '@lifaon/math';
 import { IReadonlyLightSpectrum } from '../../objects/light/light-spectrum.type';
-import { vec3, vec3_from_values, u16, vec4, vec4_create, u32 } from '@lifaon/math';
-import {
-  get_resulting_color_of_ray_3d_with_many_voxel_octrees_and_many_lights,
-} from './get_resulting_color_of_ray_3d_with_many_voxel_octrees_and_many_lights';
+import { IRadialLightIn3dSpace } from '../../objects/light/radial-light-in-3d-space.type';
+import { IVoxelOctreeIn3dSpace } from '../../objects/voxel-octree/voxel-octree-in-3d-space.type';
+import { get_resulting_color_of_ray_3d_with_many_voxel_octrees_and_many_lights } from './get_resulting_color_of_ray_3d_with_many_voxel_octrees_and_many_lights';
 
 export function render_voxel_octrees_and_lights_in_image_data_using_cpu(
   imageData: ImageData,
@@ -24,10 +22,10 @@ export function render_voxel_octrees_and_lights_in_image_data_using_cpu(
 
   let i: u32 = 0;
   for (let y: u16 = 0; y < height; y++) {
-    rayStartPointInNDCSpace[1] = rayEndPointInNDCSpace[1] = -(((2 * y) - heightM1) / height); // negate because y axis of Image data is opposite of viewport
+    rayStartPointInNDCSpace[1] = rayEndPointInNDCSpace[1] = -((2 * y - heightM1) / height); // negate because y axis of Image data is opposite of viewport
 
     for (let x: u16 = 0; x < width; x++) {
-      rayStartPointInNDCSpace[0] = rayEndPointInNDCSpace[0] = ((2 * x) - widthM1) / width;
+      rayStartPointInNDCSpace[0] = rayEndPointInNDCSpace[0] = (2 * x - widthM1) / width;
 
       get_resulting_color_of_ray_3d_with_many_voxel_octrees_and_many_lights(
         color,

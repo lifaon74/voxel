@@ -1,8 +1,7 @@
-import { u32 } from '@lifaon/math';
-import { IXYZIVoxel } from './xyzi-voxel.type';
-import { read_u32_be_from_bytes_buffer } from '@lifaon/math';
+import { read_u32_be_from_bytes_buffer, u32 } from '@lifaon/math';
 import { IGenericVoxChunk } from '../decode_generic_vox_chunk';
 import { IXYZIVoxChunk } from './xyzi-vox-chunk.type';
+import { IXYZIVoxel } from './xyzi-voxel.type';
 
 export function convert_generic_vox_chunk_to_xyzi_vox_chunk(
   chunk: IGenericVoxChunk,

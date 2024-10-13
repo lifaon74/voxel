@@ -6,13 +6,8 @@ export class Texture3D {
   readonly y: u32;
   readonly z: u32;
 
-  constructor(
-    data: Uint8ClampedArray,
-    x: u32,
-    y: u32,
-    z: u32,
-  ) {
-    if (data.length !== (x * y * z) * 4) {
+  constructor(data: Uint8ClampedArray, x: u32, y: u32, z: u32) {
+    if (data.length !== x * y * z * 4) {
       throw new Error(`Data size doesn't match x, y, z size`);
     }
 
@@ -22,11 +17,7 @@ export class Texture3D {
     this.z = z;
   }
 
-  getIndexFromPosition(
-    x: u32,
-    y: u32,
-    z: u32,
-  ): number {
-    return (x + (y * this.x) + (z * this.x * this.y)) * 4;
+  getIndexFromPosition(x: u32, y: u32, z: u32): number {
+    return (x + y * this.x + z * this.x * this.y) * 4;
   }
 }

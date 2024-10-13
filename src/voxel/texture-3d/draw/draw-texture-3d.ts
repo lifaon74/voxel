@@ -1,14 +1,7 @@
-import { u32 } from '@lifaon/math';
 import { draw_image_data } from '../../../draw-voxels/draw_image_data';
-import { read_u8_from_memory } from '../../memory/functions/read-write/u8/read_u8_from_memory';
-import { IMemoryAddress } from '../../memory/types/memory-address.type';
-import { voxel_octree_depth_to_side } from '../../octree/functions/depth-side/voxel_octree_depth_to_side';
-import { NO_MATERIAL } from '../../octree/special-addresses.constant';
 import { Texture3D } from '../texture-3d.class';
 
-export function convert_texture_3d_to_image_data_slices(
-  texture3d: Texture3D,
-): ImageData {
+export function convert_texture_3d_to_image_data_slices(texture3d: Texture3D): ImageData {
   return new ImageData(texture3d.data, texture3d.x, texture3d.y * texture3d.z);
 }
 
@@ -32,10 +25,6 @@ export function convert_texture_3d_to_image_data_slices(
 //   return img;
 // }
 
-export function draw_texture_3d(
-  texture3d: Texture3D,
-  scale?: number,
-): void {
+export function draw_texture_3d(texture3d: Texture3D, scale?: number): void {
   draw_image_data(convert_texture_3d_to_image_data_slices(texture3d), scale);
 }
-

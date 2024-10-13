@@ -10,11 +10,6 @@ export function allocate_and_write_voxel_octree_in_memory(
   voxelMaterialAddress: IMemoryAddress,
 ): IMemoryAddress {
   const voxelOctreeAddress: IMemoryAddress = alloc(SIZEOF_VOXEL_OCTREE);
-  write_voxel_octree_in_memory(
-    memory,
-    voxelOctreeAddress,
-    voxelMaterialAddress,
-  );
+  write_voxel_octree_in_memory(memory, voxelOctreeAddress, voxelMaterialAddress);
   return voxelOctreeAddress;
 }
-

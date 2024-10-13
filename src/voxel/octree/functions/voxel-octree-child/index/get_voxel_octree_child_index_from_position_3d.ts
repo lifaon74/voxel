@@ -9,8 +9,9 @@ export function get_voxel_octree_child_index_from_position_3d(
   position: IVoxelOctreePosition3d,
 ): u8 {
   return (
-    ((position[0] >> voxelOctreeDepth) & 0x1)
-    | (((position[1] >> voxelOctreeDepth) & 0x1) << 1)
-    | (((position[2] >> voxelOctreeDepth) & 0x1) << 2)
-  ) >>> 0;
+    (((position[0] >> voxelOctreeDepth) & 0x1) |
+      (((position[1] >> voxelOctreeDepth) & 0x1) << 1) |
+      (((position[2] >> voxelOctreeDepth) & 0x1) << 2)) >>>
+    0
+  );
 }

@@ -11,5 +11,7 @@ export function display_voxel_octree_slice(
   voxelOctreeDepth: u8,
   getMaterial: ISliceVoxelOctreeCallback,
 ): HTMLCanvasElement {
-  return draw_image_data(slice_voxel_octree(memory, voxelOctreeAddress, voxelOctreeDepth, getMaterial));
+  return draw_image_data(
+    slice_voxel_octree(memory, voxelOctreeAddress, voxelOctreeDepth, getMaterial),
+  );
 }

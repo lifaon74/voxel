@@ -17,10 +17,7 @@ export function convert_entry_or_exit_point_3d_to_voxel_octree_coordinates(
   // intHitPosition[2] = hitPosition[2] - ((rayVector[2] < 0) ? Number.EPSILON : 0);
   for (let i: u8 = 0; i < 3; i++) {
     out[i] = point[i]; // cast from f32 to u16
-    if (
-      (rayEndPoint[i] < rayStartPoint[i])
-      && (out[i] === point[i])
-    ) {
+    if (rayEndPoint[i] < rayStartPoint[i] && out[i] === point[i]) {
       out[i]--;
     }
   }

@@ -6,9 +6,7 @@ import { IUnknownVoxChunk } from './unknown-vox-chunk.type';
 
 export function decode_unknown_vox_chunk(
   buffer: BytesBuffer,
-  alloc: AllocFunction
+  alloc: AllocFunction,
 ): IUnknownVoxChunk {
   return convert_generic_chunk_to_unknown_vox_chunk(decode_generic_vox_chunk(buffer, alloc));
 }
-
-

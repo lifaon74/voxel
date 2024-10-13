@@ -1,13 +1,13 @@
 import { u32, u8 } from '@lifaon/math';
 import { SIZEOF_VOXEL_MATERIAL } from '../../../material/constants/sizeof_voxel_material.constant';
-import { IMemoryAddress } from '../../../memory/types/memory-address.type';
-import { IMemory } from '../../../memory/memory.type';
 import { read_u32_be_from_memory } from '../../../memory/functions/read-write/u32/read_u32_be_from_memory';
 import { SIZEOF_U32 } from '../../../memory/functions/read-write/u32/sizeof_u32.constant';
-import { NO_MATERIAL } from '../../special-addresses.constant';
+import { IMemory } from '../../../memory/memory.type';
+import { IMemoryAddress } from '../../../memory/types/memory-address.type';
 import { SIZEOF_VOXEL_OCTREE } from '../../constants/sizeof_voxel_octree.constant';
+import { NO_MATERIAL } from '../../special-addresses.constant';
 import {
-  is_voxel_octree_child_index_a_voxel_octree_address,
+  is_voxel_octree_child_index_a_voxel_octree_address
 } from '../voxel-octree-child/index/is_voxel_octree_child_index_a_voxel_octree_address';
 
 /**
@@ -27,13 +27,7 @@ export function get_amount_of_memory_used_by_voxel_octree(
         memory,
         voxelOctreeChildAddressAddress,
       );
-      if (
-        is_voxel_octree_child_index_a_voxel_octree_address(
-          memory,
-          voxelOctreeAddress,
-          i,
-        )
-      ) {
+      if (is_voxel_octree_child_index_a_voxel_octree_address(memory, voxelOctreeAddress, i)) {
         size += get_amount_of_memory_used_by_voxel_octree(
           memory,
           voxelOctreeChildAddress,

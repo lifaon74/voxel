@@ -18,7 +18,13 @@ export function slice_voxel_octree(
   let i: u32 = 0;
   for (let y: u32 = 0; y < side; y++) {
     for (let x: u32 = 0; x < side; x++) {
-      const materialAddress: IMemoryAddress = getMaterial(memory, voxelOctreeAddress, voxelOctreeDepth, x, y);
+      const materialAddress: IMemoryAddress = getMaterial(
+        memory,
+        voxelOctreeAddress,
+        voxelOctreeDepth,
+        x,
+        y,
+      );
       if (materialAddress === NO_MATERIAL) {
         i += 4;
       } else {
@@ -32,4 +38,3 @@ export function slice_voxel_octree(
 
   return img;
 }
-

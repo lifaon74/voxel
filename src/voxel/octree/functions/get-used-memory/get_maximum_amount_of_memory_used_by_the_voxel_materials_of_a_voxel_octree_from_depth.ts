@@ -10,5 +10,9 @@ import {
 export function get_maximum_amount_of_memory_used_by_the_voxel_materials_of_a_voxel_octree_from_depth(
   voxelOctreeDepth: u8,
 ): u32 {
-  return get_maximum_number_of_voxel_materials_used_by_a_voxel_octree_from_depth_clamped(voxelOctreeDepth) * SIZEOF_VOXEL_MATERIAL;
+  return (
+    get_maximum_number_of_voxel_materials_used_by_a_voxel_octree_from_depth_clamped(
+      voxelOctreeDepth,
+    ) * SIZEOF_VOXEL_MATERIAL
+  );
 }

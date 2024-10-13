@@ -3,7 +3,9 @@ export function create_canvas_context(
   height: number,
   scale: number = 1,
 ): CanvasRenderingContext2D {
-  const ctx: CanvasRenderingContext2D = document.createElement('canvas').getContext('2d') as CanvasRenderingContext2D;
+  const ctx: CanvasRenderingContext2D = document
+    .createElement('canvas')
+    .getContext('2d') as CanvasRenderingContext2D;
   ctx.canvas.width = width;
   ctx.canvas.height = height;
   document.body.appendChild(ctx.canvas);

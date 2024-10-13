@@ -19,11 +19,7 @@ export function create_texture_3d_from_set_voxel_size_and_color_context(
   let s_z!: u32;
   let s_xy!: u32;
 
-  const setVoxelSizeFunction: ISetVoxelSizeFunction = (
-    x: u32,
-    y: u32,
-    z: u32,
-  ): void => {
+  const setVoxelSizeFunction: ISetVoxelSizeFunction = (x: u32, y: u32, z: u32): void => {
     s_x = x;
     s_y = y;
     s_z = z;
@@ -42,17 +38,14 @@ export function create_texture_3d_from_set_voxel_size_and_color_context(
     b: u8,
     a: u8,
   ): void => {
-    const index: u32 = (x + (y * s_x) + (z * s_xy)) * 4;
+    const index: u32 = (x + y * s_x + z * s_xy) * 4;
     data[index] = r;
     data[index + 1] = g;
     data[index + 2] = b;
     data[index + 3] = a;
   };
 
-  context(
-    setVoxelSizeFunction,
-    setVoxelColorFunction,
-  );
+  context(setVoxelSizeFunction, setVoxelColorFunction);
 
   return new Texture3D(data, s_x, s_y, s_z);
 }

@@ -11,5 +11,5 @@ export interface ISetVoxelColorFunction {
     g: u8,
     b: u8,
     a: u8,
-  ): void,
+  ): void;
 }

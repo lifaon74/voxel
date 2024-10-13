@@ -6,7 +6,7 @@ import { IUnknownVoxChunk } from './unknown-vox-chunk.type';
 export function encode_unknown_vox_chunk(
   buffer: BytesBuffer,
   alloc: AllocFunction,
-  chunk: IUnknownVoxChunk
+  chunk: IUnknownVoxChunk,
 ): void {
   return encode_generic_vox_chunk(buffer, alloc, convert_unknown_vox_chunk_to_generic_chunk(chunk));
 }

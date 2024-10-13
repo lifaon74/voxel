@@ -13,12 +13,6 @@ export function allocate_and_write_voxel_material_in_memory(
   b: u8,
 ): IMemoryAddress {
   const voxelMaterialAddress: IMemoryAddress = alloc(SIZEOF_VOXEL_MATERIAL);
-  write_voxel_material_in_memory(
-    memory,
-    voxelMaterialAddress,
-    r,
-    g,
-    b,
-  );
+  write_voxel_material_in_memory(memory, voxelMaterialAddress, r, g, b);
   return voxelMaterialAddress;
 }

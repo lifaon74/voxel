@@ -1,23 +1,25 @@
-import { is_valid_point, make_point_invalid, u32, u8, vec3, vec3_add, vec3_create, vec3_create_u16, vec3_subtract } from '@lifaon/math';
+import {
+  is_valid_point,
+  make_point_invalid,
+  u32,
+  u8,
+  vec3,
+  vec3_add,
+  vec3_create,
+  vec3_create_u16,
+  vec3_subtract,
+} from '@lifaon/math';
 import { read_u32_be_from_memory } from '../../memory/functions/read-write/u32/read_u32_be_from_memory';
 import { IMemory } from '../../memory/memory.type';
 import { IMemoryAddress } from '../../memory/types/memory-address.type';
 import { voxel_octree_depth_to_side } from '../../octree/functions/depth-side/voxel_octree_depth_to_side';
-import {
-  get_voxel_octree_child_index_from_position_3d,
-} from '../../octree/functions/voxel-octree-child/index/get_voxel_octree_child_index_from_position_3d';
-import {
-  get_voxel_octree_child_memory_address_from_voxel_octree_child_index,
-} from '../../octree/functions/voxel-octree-child/index/get_voxel_octree_child_memory_address_from_voxel_octree_child_index';
-import {
-  is_voxel_octree_child_index_a_voxel_octree_address,
-} from '../../octree/functions/voxel-octree-child/index/is_voxel_octree_child_index_a_voxel_octree_address';
+import { get_voxel_octree_child_index_from_position_3d } from '../../octree/functions/voxel-octree-child/index/get_voxel_octree_child_index_from_position_3d';
+import { get_voxel_octree_child_memory_address_from_voxel_octree_child_index } from '../../octree/functions/voxel-octree-child/index/get_voxel_octree_child_memory_address_from_voxel_octree_child_index';
+import { is_voxel_octree_child_index_a_voxel_octree_address } from '../../octree/functions/voxel-octree-child/index/is_voxel_octree_child_index_a_voxel_octree_address';
 import { NO_MATERIAL } from '../../octree/special-addresses.constant';
 import { IVoxelOctreeCoordinates } from '../types/voxel-octree-coordinates.type';
 import { convert_entry_or_exit_point_3d_to_voxel_octree_coordinates } from './convert_entry_or_exit_point_3d_to_voxel_octree_coordinates';
-import {
-  convert_voxel_octree_coordinates_to_voxel_octree_child_coordinates,
-} from './convert_voxel_octree_coordinates_to_voxel_octree_child_coordinates';
+import { convert_voxel_octree_coordinates_to_voxel_octree_child_coordinates } from './convert_voxel_octree_coordinates_to_voxel_octree_child_coordinates';
 import { get_entry_point_3d_of_ray_3d_with_cube } from './get_entry_point_3d_of_ray_3d_with_cube';
 import { get_exit_point_3d_of_ray_3d_with_cube } from './get_exit_point_3d_of_ray_3d_with_cube';
 import { is_point_on_cube_surface_or_outside } from './is_point_on_cube_surface_or_outside';
@@ -40,18 +42,14 @@ export function get_intersection_point_3d_of_ray_3d_with_voxel_octree(
   memory: IMemory,
   voxelOctreeAddress: IMemoryAddress,
   voxelOctreeDepth: u8,
-): IMemoryAddress { // voxelMaterialAddress
+): IMemoryAddress {
+  // voxelMaterialAddress
   make_point_invalid(out);
 
   const side: u32 = voxel_octree_depth_to_side(voxelOctreeDepth);
 
   // gets the entry point where the ray enters this <voxelOctree>
-  get_entry_point_3d_of_ray_3d_with_cube(
-    out,
-    rayStartPoint,
-    rayEndPoint,
-    side,
-  );
+  get_entry_point_3d_of_ray_3d_with_cube(out, rayStartPoint, rayEndPoint, side);
 
   if (is_valid_point(out)) {
     let i: u32 = 0;
@@ -107,54 +105,27 @@ export function get_intersection_point_3d_of_ray_3d_with_voxel_octree(
             );
 
             // gets a temporary ray start point relative to this <voxelOctreeChild>
-            vec3_subtract(
-              RAY_START_POINT,
-              rayStartPoint,
-              VOXEL_OCTREE_COORDINATES,
-            );
+            vec3_subtract(RAY_START_POINT, rayStartPoint, VOXEL_OCTREE_COORDINATES);
 
             // gets a temporary ray end point relative to this <voxelOctreeChild>
-            vec3_subtract(
-              RAY_END_POINT,
-              rayEndPoint,
-              VOXEL_OCTREE_COORDINATES,
-            );
+            vec3_subtract(RAY_END_POINT, rayEndPoint, VOXEL_OCTREE_COORDINATES);
 
             // computes where this temporary ray exits this <voxelOctreeChild>
-            get_exit_point_3d_of_ray_3d_with_cube(
-              out,
-              RAY_START_POINT,
-              RAY_END_POINT,
-              localSide,
-            );
+            get_exit_point_3d_of_ray_3d_with_cube(out, RAY_START_POINT, RAY_END_POINT, localSide);
 
             if (!is_valid_point(out)) {
               debugger;
-              get_exit_point_3d_of_ray_3d_with_cube(
-                out,
-                RAY_START_POINT,
-                RAY_END_POINT,
-                localSide,
-              );
+              get_exit_point_3d_of_ray_3d_with_cube(out, RAY_START_POINT, RAY_END_POINT, localSide);
               return NO_MATERIAL;
             }
 
             // translate the resulting exit point to real coordinates space
-            vec3_add(
-              out,
-              out,
-              VOXEL_OCTREE_COORDINATES,
-            );
+            vec3_add(out, out, VOXEL_OCTREE_COORDINATES);
 
             // TODO check if RAY_START_POINT === RAY_END_POINT
 
             // finally check if the point leaves the voxel
-            if (
-              is_point_on_cube_surface_or_outside(
-                out,
-                side,
-              )
-            ) {
+            if (is_point_on_cube_surface_or_outside(out, side)) {
               return NO_MATERIAL;
             } else {
               break;
@@ -169,6 +140,3 @@ export function get_intersection_point_3d_of_ray_3d_with_voxel_octree(
 
   return NO_MATERIAL;
 }
-
-
-
