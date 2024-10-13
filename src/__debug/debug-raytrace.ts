@@ -36,7 +36,7 @@ import {
 import { allocate_and_write_voxel_material_address_in_memory_of_voxel_octree_at_position } from '../voxel/octree/functions/voxel-material/at-position/allocate_and_write_voxel_material_address_in_memory_of_voxel_octree_at_position';
 import { NO_MATERIAL } from '../voxel/octree/special-addresses.constant';
 import { get_intersection_point_3d_of_ray_3d_with_voxel_octree } from '../voxel/raytrace/functions/get_intersection_point_3d_of_ray_3d_with_voxel_octree';
-import { import_vox_file_url_into_texture_3d } from '../voxel/vox-file/draw/import_vox_file_url_into_texture_3d';
+import { load_vox_file_url_as_texture_3d } from '../voxel/vox-file/load-and-save/load/load_vox_file_url_as_texture_3d';
 import { generateRainbowVoxelOctree } from './generate/generate-rainbow-voxel-octree';
 
 // MVP => https://jsantell.com/model-view-projection/#:~:text=The%20model%2C%20view%2C%20and%20projection,coordinates%20via%20implicit%20perspective%20division.
@@ -179,7 +179,7 @@ async function debugRayTrace2() {
     // const url = new URL('./samples/ephtracy/monument/monu9.vox?raw', import.meta.url);
     // const url = new URL('./samples/haunted_house.vox?raw', import.meta.url);
     // const url = new URL('./samples/treehouse.vox?raw', import.meta.url);
-    const texture = await import_vox_file_url_into_texture_3d(url);
+    const texture = await load_vox_file_url_as_texture_3d(url);
 
     const side = Math.max(texture.x, texture.y, texture.z);
     const voxelOctreeDepth = voxel_octree_side_to_depth_loose(side);

@@ -1,6 +1,6 @@
 import { draw_texture_3d } from '../voxel/texture-3d/draw/draw-texture-3d';
 import { Texture3D } from '../voxel/texture-3d/texture-3d.class';
-import { import_vox_file_url_into_texture_3d } from '../voxel/vox-file/draw/import_vox_file_url_into_texture_3d';
+import { load_vox_file_url_as_texture_3d } from '../voxel/vox-file/load-and-save/load/load_vox_file_url_as_texture_3d';
 
 // import vox from './samples/goxel-test.vox?raw'
 
@@ -40,7 +40,7 @@ async function debugTexture3d2() {
   // const url = new URL('./samples/ephtracy/anim/horse.vox?raw', import.meta.url);
   const url = new URL('../../assets/vox/ephtracy/anim/T-Rex.vox?raw', import.meta.url);
   // const url = new URL('./samples/ephtracy/monument/monu1.vox?raw', import.meta.url);
-  const texture = await import_vox_file_url_into_texture_3d(url);
+  const texture = await load_vox_file_url_as_texture_3d(url);
   draw_texture_3d(texture, 4);
 }
 

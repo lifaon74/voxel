@@ -1,6 +1,6 @@
 import { u8 } from '@lifaon/math';
 
-export interface IXYZIVoxel {
+export interface XYZIVoxel {
   readonly x: u8;
   readonly y: u8;
   readonly z: u8;
