@@ -18,7 +18,6 @@
   },
   "dependencies": {
     "@lifaon/math": "latest",
-    "@lirx/core": "latest",
     "@lirx/unsubscribe": "latest",
     "@lirx/utils": "latest",
     "tslib": "^2.7.0"

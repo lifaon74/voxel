@@ -25,25 +25,3 @@ export function convert_generic_vox_chunk_to_main_vox_chunk(
   };
 }
 
-// TODO
-export function convert_main_vox_chunk_to_generic_vox_chunk(
-  chunk: IMainVoxChunk,
-): IGenericVoxChunk {
-  if (chunk.bytes.length !== 0) {
-    throw new Error('MAIN chunk should not have content');
-  }
-
-  const children: IUnknownVoxChunk[] = [];
-  const buffer: BytesBuffer = chunk.childrenBytes;
-  const alloc: AllocFunction = create_alloc_function_for_bytes_buffer(buffer);
-
-  while (buffer.length > alloc(0)) {
-    children.push(decode_unknown_vox_chunk(buffer, alloc));
-  }
-
-  return {
-    id: 'MAIN',
-    bytes: new Uint8Array(),
-    childrenBytes,
-  };
-}
