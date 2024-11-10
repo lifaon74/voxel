@@ -1,16 +1,15 @@
-import { mat4, mat4_create, u8 } from '@lifaon/math';
-import { IMemory } from '../../voxel/memory/memory.type';
-import { IMemoryAddress } from '../../voxel/memory/types/memory-address.type';
+import { mat4, mat4_create, u32, u8 } from '@lifaon/math';
+import { ReadonlyMemoryTrait } from '../../memory/read/readonly/traits/readonly-memory.trait';
 
 export interface IVoxelOctreeOptions {
-  readonly memory: IMemory;
-  readonly address: IMemoryAddress;
+  readonly memory: ReadonlyMemoryTrait;
+  readonly address: u32;
   readonly depth: u8;
 }
 
-export class VoxelOctree {
-  memory: IMemory;
-  address: IMemoryAddress;
+export class VoxelOctreeIn3DSpace {
+  memory: ReadonlyMemoryTrait;
+  address: u32;
   depth: u8;
   matrix: mat4;
 

@@ -23,8 +23,15 @@ const supportsFileSystemAccess: boolean =
     }
   })();
 
-export async function saveFile(blob: Blob, options?: ShowSaveFilePickerOptions): Promise<void> {
-  if (supportsFileSystemAccess) {
+export interface SaveFileOptions extends ShowSaveFilePickerOptions {
+  readonly mode?: 'download' | 'save';
+}
+
+export async function saveFile(
+  blob: Blob,
+  { mode = 'save', ...options }: SaveFileOptions = {},
+): Promise<void> {
+  if (supportsFileSystemAccess && mode === 'save') {
     try {
       const handle: FileSystemFileHandle = await showSaveFilePicker(options);
       const writable: FileSystemWritableFileStream = await handle.createWritable();
@@ -45,9 +52,13 @@ export async function saveFile(blob: Blob, options?: ShowSaveFilePickerOptions):
     a.style.display = 'none';
     document.body.append(a);
     a.click();
-    setTimeout(() => {
-      URL.revokeObjectURL(blobURL);
-      a.remove();
-    }, 1000);
+    URL.revokeObjectURL(blobURL);
+    a.remove();
   }
 }
+
+// const windowEvents: readonly string[] = ['focus', 'click', 'keydown']
+//
+//
+// export function trustedContext(ctx: () => void): UndoFunction {
+// }

@@ -5,6 +5,7 @@ dist-ssr
 *.local
 .idea
 
+coverage
 
 # Yarn
 yarn-error.log

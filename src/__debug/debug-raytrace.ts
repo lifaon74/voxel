@@ -4,40 +4,30 @@ import {
   mat4_invert,
   mat4_multiply,
   mat4_translate,
+  u8,
   vec3_create,
-  vec3_create_u32,
   vec3_from_values,
-  vec3_u32,
 } from '@lifaon/math';
 import { createAnimationFrameLoop, createEventListener } from '@lirx/utils';
 import { FreeViewMatrix } from '../camera/free-camera';
-import { create_canvas_context } from '../draw-voxels/create_canvas_context';
-import { display_voxel_octree_slice } from '../draw-voxels/display_voxel_octree_slice';
-import { slice_octree_using_read_voxel } from '../draw-voxels/slice/slice_octree_using_read_voxel';
+import { load_vox_file_url_as_texture_3d } from '../formats/vox-file/load-and-save/load/load_vox_file_url_as_texture_3d';
+import { create_canvas_context } from '../image/canvas/create_canvas_context';
+import { draw_image_data } from '../image/canvas/draw_image_data';
+import { LinearDynamicMemory } from '../memory/shared/dynamic/linear-dynamic-memory';
 import { Camera } from '../objects/camera/camera.class';
 import { IReadonlyLightSpectrum } from '../objects/light/light-spectrum.type';
 import { Light } from '../objects/light/light.class';
 import { IRadialLightIn3dSpace } from '../objects/light/radial-light-in-3d-space.type';
 import { Scene } from '../objects/scene/scene.class';
 import { IVoxelOctreeIn3dSpace } from '../objects/voxel-octree/voxel-octree-in-3d-space.type';
-import { VoxelOctree } from '../objects/voxel-octree/voxel-octree.class';
+import { VoxelOctreeIn3DSpace } from '../objects/voxel-octree/voxel-octree.class';
 import { render_voxel_octrees_and_lights_in_image_data_using_cpu } from '../render/functions/render_voxel_octrees_and_lights_in_image_data_using_cpu';
-import { draw_texture_3d_into_set_voxel_color_function } from '../voxel/generate/built-in/draw/draw_texture_3d_into_set_voxel_color_function';
-import { allocate_and_write_voxel_material_in_memory } from '../voxel/material/functions/allocate/allocate_and_write_voxel_material_in_memory';
-import { create_memory_alloc_function } from '../voxel/memory/functions/alloc/create_memory_alloc_function';
-import { create_memory_from_size } from '../voxel/memory/functions/create/create_memory_from_size';
-import { print_dynamic_memory } from '../voxel/memory/functions/print/print_dynamic_memory';
-import { IMemoryAddress } from '../voxel/memory/types/memory-address.type';
-import { allocate_and_write_voxel_octree_in_memory } from '../voxel/octree/functions/allocate/allocate_and_write_voxel_octree_in_memory';
-import {
-  voxel_octree_side_to_depth,
-  voxel_octree_side_to_depth_loose,
-} from '../voxel/octree/functions/depth-side/voxel_octree_side_to_depth';
-import { allocate_and_write_voxel_material_address_in_memory_of_voxel_octree_at_position } from '../voxel/octree/functions/voxel-material/at-position/allocate_and_write_voxel_material_address_in_memory_of_voxel_octree_at_position';
+import { draw_rainbow_cube_into_texture_3d } from '../texture/operations/draw/draw_rainbow_cube_into_texture_3d';
+import { Texture3D } from '../texture/texture-3d/texture-3d';
+import { read_voxel_material } from '../voxel/material/read-write/read_voxel_material';
 import { NO_MATERIAL } from '../voxel/octree/special-addresses.constant';
-import { get_intersection_point_3d_of_ray_3d_with_voxel_octree } from '../voxel/raytrace/functions/get_intersection_point_3d_of_ray_3d_with_voxel_octree';
-import { load_vox_file_url_as_texture_3d } from '../voxel/vox-file/load-and-save/load/load_vox_file_url_as_texture_3d';
-import { generateRainbowVoxelOctree } from './generate/generate-rainbow-voxel-octree';
+import { get_intersection_point_3d_of_ray_3d_with_voxel_octree } from '../voxel/raytrace/voxel-octree/get_intersection_point_3d_of_ray_3d_with_voxel_octree';
+import { VoxelOctree } from '../voxel/texture-3d/voxel-octree';
 
 // MVP => https://jsantell.com/model-view-projection/#:~:text=The%20model%2C%20view%2C%20and%20projection,coordinates%20via%20implicit%20perspective%20division.
 // NDC => https://carmencincotti.com/2022-05-02/homogeneous-coordinates-clip-space-ndc/
@@ -78,7 +68,7 @@ export function render_scene_in_image_data_using_cpu(
 
   return render_voxel_octrees_and_lights_in_image_data_using_cpu(
     imageData,
-    scene.voxelOctrees.map((voxelOctree: VoxelOctree): IVoxelOctreeIn3dSpace => {
+    scene.voxelOctrees.map((voxelOctree: VoxelOctreeIn3DSpace): IVoxelOctreeIn3dSpace => {
       const mvp: mat4 = mat4_create();
       const mvpi: mat4 = mat4_create();
 
@@ -110,118 +100,122 @@ export function render_scene_in_image_data_using_cpu(
   );
 }
 
-function debugRayTrace1() {
-  const memory = create_memory_from_size(2 ** 30 - 1);
-  const alloc = create_memory_alloc_function(memory);
+// function debugRayTrace1() {
+//   // const memory = create_bytes_buffer(2 ** 30 - 1);
+//   // const alloc = create_simple_alloc_function(memory);
+//   //
+//   // const voxelOctreeDepth = voxel_octree_side_to_depth(16);
+//   // const voxelOctreeAddress = new_voxel_octree(memory, alloc, NO_MATERIAL);
+//   //
+//   // console.time('gen');
+//   // generateRainbowVoxelOctree(memory, alloc, voxelOctreeAddress, voxelOctreeDepth);
+//   // console.timeEnd('gen');
+//   //
+//   // print_dynamic_memory(memory, alloc);
+//   // display_voxel_octree_slice(
+//   //   memory,
+//   //   voxelOctreeAddress,
+//   //   voxelOctreeDepth,
+//   //   slice_octree_using_read_voxel(0),
+//   // );
+//   //
+//   // const out = vec3_create();
+//   // const material = get_intersection_point_3d_of_ray_3d_with_voxel_octree(
+//   //   out,
+//   //   vec3_from_values(0.5, 0.5, -0.5),
+//   //   vec3_from_values(0, 0, 1),
+//   //   memory,
+//   //   voxelOctreeAddress,
+//   //   voxelOctreeDepth,
+//   // );
+//   //
+//   // console.log(out);
+//   //
+//   // if (material !== NO_MATERIAL) {
+//   //   console.log(memory[material], memory[material + 1], memory[material + 2]);
+//   // }
+// }
 
-  const voxelOctreeDepth = voxel_octree_side_to_depth(16);
-  const voxelOctreeAddress = allocate_and_write_voxel_octree_in_memory(memory, alloc, NO_MATERIAL);
+function debugRayTrace1() {
+  const side: u8 = 16;
 
   console.time('gen');
-  generateRainbowVoxelOctree(memory, alloc, voxelOctreeAddress, voxelOctreeDepth);
+  const texture = VoxelOctree.create(side, side, side);
+  // const texture = Texture3D.create(side, side, side);
+  draw_rainbow_cube_into_texture_3d(texture);
   console.timeEnd('gen');
 
-  print_dynamic_memory(memory, alloc);
-  display_voxel_octree_slice(
-    memory,
-    voxelOctreeAddress,
-    voxelOctreeDepth,
-    slice_octree_using_read_voxel(0),
-  );
+  texture.memory.print();
+
+  draw_image_data(texture.toImageData(), 8);
+
+  const x: number = 1.5;
+  const y: number = 0.5;
+  const z: number = -0.5;
+  const dz: number = 0.2;
 
   const out = vec3_create();
+
   const material = get_intersection_point_3d_of_ray_3d_with_voxel_octree(
     out,
-    vec3_from_values(0.5, 0.5, -0.5),
-    vec3_from_values(0, 0, 1),
-    memory,
-    voxelOctreeAddress,
-    voxelOctreeDepth,
+    vec3_from_values(x, y, z),
+    vec3_from_values(x, y, z + dz),
+    texture.memory,
+    texture.address,
+    texture.depth,
   );
 
   console.log(out);
 
   if (material !== NO_MATERIAL) {
-    console.log(memory[material], memory[material + 1], memory[material + 2]);
+    console.log(material);
+    console.log(read_voxel_material(texture.memory, material));
   }
 }
 
 async function debugRayTrace2() {
   /* CREATE VOXELS */
 
-  const memory = create_memory_from_size(2 ** 30 - 1);
-  const alloc = create_memory_alloc_function(memory);
+  // const createRainbowVoxelOctree = (side: number): VoxelOctreeIn3DSpace => {
+  //   const voxelOctreeDepth = voxel_octree_side_to_depth(side);
+  //   const voxelOctreeAddress = new_voxel_octree(memory, alloc, NO_MATERIAL);
+  //
+  //   generateRainbowVoxelOctree(memory, alloc, voxelOctreeAddress, voxelOctreeDepth);
+  //
+  //   return new VoxelOctreeIn3DSpace({
+  //     memory,
+  //     address: voxelOctreeAddress,
+  //     depth: voxelOctreeDepth,
+  //   });
+  // };
 
-  const createRainbowVoxelOctree = (side: number): VoxelOctree => {
-    const voxelOctreeDepth = voxel_octree_side_to_depth(side);
-    const voxelOctreeAddress = allocate_and_write_voxel_octree_in_memory(
-      memory,
-      alloc,
-      NO_MATERIAL,
-    );
-
-    generateRainbowVoxelOctree(memory, alloc, voxelOctreeAddress, voxelOctreeDepth);
-
-    return new VoxelOctree({
-      memory,
-      address: voxelOctreeAddress,
-      depth: voxelOctreeDepth,
-    });
-  };
-
-  const createAlienBotVoxelOctree = async (): Promise<VoxelOctree> => {
+  const importVoxelOctree = async (): Promise<VoxelOctreeIn3DSpace> => {
     // const url = new URL('./samples/alien_bot1.vox?raw', import.meta.url);
     // const url = new URL('./samples/ephtracy/anim/T-Rex.vox?raw', import.meta.url);
     // const url = new URL('./samples/ephtracy/monument/monu6-without-water.vox?raw', import.meta.url);
     // const url = new URL('./samples/ephtracy/monument/monu5.vox?raw', import.meta.url);
     // const url = new URL('./samples/ephtracy/monument/monu10.vox?raw', import.meta.url);
-    const url = new URL('./samples/ephtracy/monument/monu16.vox?raw', import.meta.url);
+    const url = new URL('../../assets/vox/ephtracy/monument/monu16.vox?raw', import.meta.url);
+    // const url = new URL(
+    //   '../../assets/tilesets/templates/floors/pavers_06.vox?raw',
+    //   import.meta.url,
+    // );
     // const url = new URL('./samples/ephtracy/monument/monu9.vox?raw', import.meta.url);
     // const url = new URL('./samples/haunted_house.vox?raw', import.meta.url);
     // const url = new URL('./samples/treehouse.vox?raw', import.meta.url);
-    const texture = await load_vox_file_url_as_texture_3d(url);
+    const texture: VoxelOctree<LinearDynamicMemory> = await load_vox_file_url_as_texture_3d<
+      VoxelOctree<LinearDynamicMemory>
+    >(url, VoxelOctree);
 
-    const side = Math.max(texture.x, texture.y, texture.z);
-    const voxelOctreeDepth = voxel_octree_side_to_depth_loose(side);
-    const voxelOctreeAddress = allocate_and_write_voxel_octree_in_memory(
-      memory,
-      alloc,
-      NO_MATERIAL,
-    );
-
-    const POSITION: vec3_u32 = vec3_create_u32();
-
-    draw_texture_3d_into_set_voxel_color_function(texture, (x, y, z, r, g, b, a) => {
-      POSITION[0] = x;
-      POSITION[1] = y;
-      POSITION[2] = z;
-
-      const voxelMaterialAddress: IMemoryAddress =
-        a === 255 ?
-          allocate_and_write_voxel_material_in_memory(memory, alloc, r, g, b)
-        : NO_MATERIAL;
-
-      allocate_and_write_voxel_material_address_in_memory_of_voxel_octree_at_position(
-        memory,
-        alloc,
-        voxelOctreeAddress,
-        voxelOctreeDepth,
-        POSITION,
-        voxelMaterialAddress,
-      );
-    });
-
-    return new VoxelOctree({
-      memory,
-      address: voxelOctreeAddress,
-      depth: voxelOctreeDepth,
-    });
+    return new VoxelOctreeIn3DSpace(texture);
   };
 
   // const rainbowVoxelOctree = createRainbowVoxelOctree(16);
-  const alienBotVoxelOctree = await createAlienBotVoxelOctree();
+  const importedVoxelOctree = await importVoxelOctree();
+  // const importedVoxelOctree2 = await importVoxelOctree();
+  // mat4_translate(importedVoxelOctree2.matrix, importedVoxelOctree2.matrix, [32, 0, 0]);
 
-  print_dynamic_memory(memory, alloc);
+  // print_dynamic_memory(importedVoxelOctree.memory as any);
 
   /* CREATE LIGHTS */
 
@@ -270,10 +264,10 @@ async function debugRayTrace2() {
     ambientLightSpectrum,
     voxelOctrees: [
       // rainbowVoxelOctree,
-      alienBotVoxelOctree,
+      importedVoxelOctree,
     ],
     lights: [
-      // sunLight,
+      sunLight,
       spotLight0,
       // spotLight1,
       // spotLight2,
@@ -311,6 +305,6 @@ async function debugRayTrace2() {
 /*--------------------------*/
 
 export async function debugRayTrace() {
-  // debugRayTrace1();
-  debugRayTrace2();
+  debugRayTrace1();
+  // debugRayTrace2();
 }

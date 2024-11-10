@@ -27,7 +27,7 @@ export class FreeViewMatrix {
   #stop: IUnsubscribe | undefined;
   #update: IFreeViewMatrixUpdateFunction;
 
-  constructor({ translationSpeed = 1, rotationSpeed = 0.5 }: IFreeViewMatrixOptions = {}) {
+  constructor({ translationSpeed = 1, rotationSpeed = 0.1 }: IFreeViewMatrixOptions = {}) {
     this.#translationSpeed = translationSpeed / 1000;
     this.#rotationSpeed = (rotationSpeed / 1000) * MATH_PI;
     this.#matrix = mat4_create();
