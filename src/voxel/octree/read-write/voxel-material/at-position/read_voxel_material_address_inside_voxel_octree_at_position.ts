@@ -1,7 +1,6 @@
-import { u32, u8 } from '@lifaon/math';
+import { u32, u8, vec3_u32 } from '@lifaon/math';
 import { MemoryReadU32BETrait } from '../../../../../memory/read/readonly/traits/methods/memory.read_u32_be.trait';
 import { MemoryReadU8Trait } from '../../../../../memory/read/readonly/traits/methods/memory.read_u8.trait';
-import { VoxelOctreePosition3D } from '../../../types/voxel-octree-position-3d';
 import { get_voxel_octree_child_index_from_position_3d } from '../../../voxel-octree-child/index/get_voxel_octree_child_index_from_position_3d';
 import { get_voxel_octree_child_memory_address_from_voxel_octree_child_index } from '../../../voxel-octree-child/index/get_voxel_octree_child_memory_address_from_voxel_octree_child_index';
 import { is_voxel_octree_child_index_a_voxel_octree_address } from '../../../voxel-octree-child/index/is_voxel_octree_child_index_a_voxel_octree_address';
@@ -16,7 +15,7 @@ export function read_voxel_material_address_inside_voxel_octree_at_position(
   memory: ReadVoxelMaterialAddressInsideVoxelOctreeAtPositionMemory,
   voxelOctreeAddress: u32,
   voxelOctreeDepth: u8,
-  position: VoxelOctreePosition3D,
+  position: vec3_u32,
 ): u32 {
   while (voxelOctreeDepth >= 0) {
     const voxelOctreeChildIndex: u8 = get_voxel_octree_child_index_from_position_3d(

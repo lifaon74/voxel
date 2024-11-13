@@ -1,4 +1,4 @@
-import { u32, u8 } from '@lifaon/math';
+import { u32, u8, vec3_from_values_u32 } from '@lifaon/math';
 import { LinearDynamicMemory } from '../../memory/shared/dynamic/linear-dynamic-memory';
 import { Texture3DSetColorTrait } from '../../texture/texture-3d/traits/methods/texture-3d.set-color.trait';
 import {
@@ -68,7 +68,7 @@ export class VoxelOctree<GMemory extends VoxelMemory = VoxelMemory>
       this.memory,
       this.address,
       this.depth,
-      [x, y, z] as any,
+      vec3_from_values_u32(x, y, z),
       voxelMaterialAddress,
     );
   }

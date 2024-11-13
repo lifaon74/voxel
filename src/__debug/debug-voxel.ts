@@ -3,7 +3,6 @@ import { draw_image_data } from '../image/canvas/draw_image_data';
 import { LinearDynamicMemory } from '../memory/shared/dynamic/linear-dynamic-memory';
 import { draw_rainbow_cube_into_texture_3d } from '../texture/operations/draw/draw_rainbow_cube_into_texture_3d';
 import { new_voxel_material } from '../voxel/material/read-write/new_voxel_material';
-import { print_dynamic_memory } from '../voxel/memory/functions/print/print_dynamic_memory';
 import { voxel_octree_side_to_depth } from '../voxel/octree/depth-side/voxel_octree_side_to_depth';
 import { new_voxel_octree } from '../voxel/octree/read-write/new_voxel_octree';
 import { insert_voxel_material_address_inside_voxel_octree_at_position } from '../voxel/octree/read-write/voxel-material/at-position/insert_voxel_material_address_inside_voxel_octree_at_position';

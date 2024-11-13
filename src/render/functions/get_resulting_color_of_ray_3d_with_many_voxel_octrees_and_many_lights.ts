@@ -10,21 +10,24 @@ import {
 } from '@lifaon/math';
 import { null_vec3_transform_mat4 } from '../../functions/null_vec3_transform_mat4';
 import { ReadonlyMemoryTrait } from '../../memory/read/readonly/traits/readonly-memory.trait';
-import { ILightSpectrum, IReadonlyLightSpectrum } from '../../objects/light/light-spectrum.type';
-import { IRadialLightIn3dSpace } from '../../objects/light/radial-light-in-3d-space.type';
-import { IVoxelOctreeIn3dSpace } from '../../objects/voxel-octree/voxel-octree-in-3d-space.type';
+import { RadialLightIn3dSpaceTrait } from '../../scene/traits/light/radial-light-in-3d-space.trait';
+import {
+  LightSpectrum,
+  ReadonlyLightSpectrum,
+} from '../../scene/traits/light/types/light-spectrum';
+import { VoxelOctreeIn3dSpaceTrait } from '../../scene/traits/voxel-octree/voxel-octree-in-3d-space.trait';
 import { NO_MATERIAL } from '../../voxel/octree/special-addresses.constant';
-import { can_ray_3d_reach_light_through_many_voxel_octrees } from '../../voxel/raytrace/functions_legacy/can_ray_3d_reach_light_through_many_voxel_octrees';
+import { can_ray_3d_reach_light_through_many_voxel_octrees } from '../../voxel/raytrace/__not_used/functions_legacy/can_ray_3d_reach_light_through_many_voxel_octrees';
 import {
   get_intersection_point_3d_of_ray_3d_with_many_voxel_octrees,
   IGetIntersectionPoint3dOfRay3dWithManyVoxelOctreesResult,
-} from '../../voxel/raytrace/functions_legacy/get_intersection_point_3d_of_ray_3d_with_many_voxel_octrees';
+} from '../../voxel/raytrace/__not_used/functions_legacy/get_intersection_point_3d_of_ray_3d_with_many_voxel_octrees';
 
 export function get_resulting_color_of_ray_3d_with_many_voxel_octrees_and_many_lights(
   color: vec4, // out
-  voxelOctreesIn3dSpace: readonly IVoxelOctreeIn3dSpace[],
-  lightsIn3dSpace: readonly IRadialLightIn3dSpace[],
-  ambientLightSpectrum: IReadonlyLightSpectrum,
+  voxelOctreesIn3dSpace: readonly VoxelOctreeIn3dSpaceTrait[],
+  lightsIn3dSpace: readonly RadialLightIn3dSpaceTrait[],
+  ambientLightSpectrum: ReadonlyLightSpectrum,
   rayStartPointInNDCSpace: vec3,
   rayEndPointInNDCSpace: vec3,
 ): void {
@@ -43,18 +46,18 @@ export function get_resulting_color_of_ray_3d_with_many_voxel_octrees_and_many_l
   } else {
     const hitPointInVoxelSpace: vec3 = result.hitPointInVoxelSpace;
     const voxelMaterialAddress: number = result.voxelMaterialAddress;
-    const voxelOctreeIn3dSpace: IVoxelOctreeIn3dSpace = voxelOctreesIn3dSpace[result.index];
+    const voxelOctreeIn3dSpace: VoxelOctreeIn3dSpaceTrait = voxelOctreesIn3dSpace[result.index];
     const voxelOctreeMVP: readonly_mat4 = voxelOctreeIn3dSpace.mvp;
     const voxelOctreeMemory: ReadonlyMemoryTrait = voxelOctreeIn3dSpace.memory;
 
-    const lightSpectrum: ILightSpectrum = vec3_clone(ambientLightSpectrum);
+    const lightSpectrum: LightSpectrum = vec3_clone(ambientLightSpectrum);
     const lightPointInNDCSpace: vec3 = vec3_create(); // where is located the light's source
     const hitPointInNDCSpace: vec3 = vec3_create(); // where is located the hit point between the ray and the voxel
 
     vec3_transform_mat4(hitPointInNDCSpace, hitPointInVoxelSpace, voxelOctreeMVP);
 
     for (let i = 0, l = lightsIn3dSpace.length; i < l; i++) {
-      const light: IRadialLightIn3dSpace = lightsIn3dSpace[i];
+      const light: RadialLightIn3dSpaceTrait = lightsIn3dSpace[i];
       const lightMVP: readonly_mat4 = light.mvp;
       const lightMVPI: readonly_mat4 = light.mvpi;
 

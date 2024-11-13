@@ -1,4 +1,4 @@
-import { u32, u8, vec3_u32 } from '@lifaon/math';
+import { u32, u8, vec3_from_values_u32 } from '@lifaon/math';
 import { mixin } from '@lifaon/traits';
 import { Texture3DToImageDataImplementationUsingSizeAndGetColor } from '../../texture/texture-3d/implementations/generic/texture-3d-to-image-data-implementation-using-size-and-get-color.implementation';
 import { Texture3DGetColorTrait } from '../../texture/texture-3d/traits/methods/texture-3d.get-color.trait';
@@ -55,7 +55,7 @@ export class ReadonlyVoxelOctree<GMemory extends ReadonlyVoxelMemory = ReadonlyV
       this.memory,
       this.address,
       this.depth,
-      [x, y, z] as unknown as vec3_u32,
+      vec3_from_values_u32(x, y, z),
     );
     if (voxelMaterialAddress === NO_MATERIAL) {
       return NO_MATERIAL_COLOR;
