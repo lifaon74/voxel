@@ -9,6 +9,7 @@
 <voxelOctreeSide>: the side of a <voxelOctree>
 <voxelOctreeChildAddress>: the address of a child of a <voxelOctree>
 <voxelOctreeChildAddressAddress>: the address of <voxelOctreeChildAddress>
+<voxelOctreeMaterialAddress>: the address of <voxelMaterialAddress>
 <voxelOctreeChildIndex>: the index of a child of a <voxelOctree>
 
 <voxelMaterial>

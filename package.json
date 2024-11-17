@@ -21,7 +21,7 @@
     "vitest": "^2.1.4"
   },
   "dependencies": {
-    "@lifaon/math": "latest",
+    "@lifaon/math": "beta",
     "@lifaon/traits": "latest",
     "@lirx/unsubscribe": "latest",
     "@lirx/utils": "latest",

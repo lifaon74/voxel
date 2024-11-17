@@ -6,9 +6,9 @@ import {
   vec3_create,
   vec3_transform_mat4,
 } from '@lifaon/math';
-import { vec3_transform_mat4_z } from '../../../../functions/vec3_transform_mat4_z';
-import { VoxelOctreeIn3dSpaceTrait } from '../../../../scene/traits/voxel-octree/voxel-octree-in-3d-space.trait';
-import { NO_MATERIAL } from '../../../octree/special-addresses.constant';
+import { vec3_transform_mat4_z } from '../../../../../../../functions/vec3_transform_mat4_z';
+import { VoxelOctreeIn3dSpaceTrait } from '../../../../../../traits/voxel-octree/voxel-octree-in-3d-space.trait';
+import { NO_MATERIAL } from '../../../../../../../voxel/octree/special-addresses.constant';
 import { get_intersection_point_3d_of_ray_3d_with_voxel_octree } from '../../voxel-octree/get_intersection_point_3d_of_ray_3d_with_voxel_octree';
 
 export interface IGetIntersectionPoint3dOfRay3dWithManyVoxelOctreesResult {

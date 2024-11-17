@@ -17,8 +17,8 @@ export function get_exit_point_3d_of_ray_3d_with_cube(
   // CUBE
   side: u32,
   // OUTPUTS
-  rayHitPoint: vec3,
-  normalVector: vec3,
+  outputRayHitPoint: vec3,
+  outputNormalVector: vec3,
 ): boolean {
   let a: u8, b: u8, c: u8;
 
@@ -49,28 +49,30 @@ export function get_exit_point_3d_of_ray_3d_with_cube(
           // point after exit surface
           break;
         } else {
-          rayHitPoint[a] = side;
+          outputRayHitPoint[a] = side;
         }
       } /*if (rayVector[a] < 0) */ else {
         if (rayStartPoint[a] < 0) {
           // point after exit surface
           break;
         } else {
-          rayHitPoint[a] = 0;
+          outputRayHitPoint[a] = 0;
         }
       }
 
-      rayHitPoint[b] =
-        rayStartPoint[b] + (rayHitPoint[a] - rayStartPoint[a]) * (rayVector[b] / rayVector[a]); // thales
+      outputRayHitPoint[b] =
+        rayStartPoint[b] +
+        (outputRayHitPoint[a] - rayStartPoint[a]) * (rayVector[b] / rayVector[a]); // thales
 
-      if (0 <= rayHitPoint[b] && rayHitPoint[b] <= side) {
-        rayHitPoint[c] =
-          rayStartPoint[c] + (rayHitPoint[a] - rayStartPoint[a]) * (rayVector[c] / rayVector[a]); // thales
+      if (0 <= outputRayHitPoint[b] && outputRayHitPoint[b] <= side) {
+        outputRayHitPoint[c] =
+          rayStartPoint[c] +
+          (outputRayHitPoint[a] - rayStartPoint[a]) * (rayVector[c] / rayVector[a]); // thales
 
-        if (0 <= rayHitPoint[c] && rayHitPoint[c] <= side) {
-          normalVector[a] = rayVector[a] > 0 ? -1 : 1;
-          normalVector[b] = 0;
-          normalVector[c] = 0;
+        if (0 <= outputRayHitPoint[c] && outputRayHitPoint[c] <= side) {
+          outputNormalVector[a] = rayVector[a] > 0 ? -1 : 1;
+          outputNormalVector[b] = 0;
+          outputNormalVector[c] = 0;
           return true;
         }
       }

@@ -17,8 +17,8 @@ export function get_entry_point_3d_of_ray_3d_with_cube(
   // CUBE
   side: u32,
   // OUTPUTS
-  rayHitPoint: vec3,
-  normalVector: vec3,
+  outputRayHitPoint: vec3,
+  outputNormalVector: vec3,
 ): boolean {
   let a: u8, b: u8, c: u8;
 
@@ -54,7 +54,7 @@ export function get_entry_point_3d_of_ray_3d_with_cube(
 
     if (rayVector[a] !== 0) {
       // if the ray is not parallel to this surface
-      rayHitPoint[a] =
+      outputRayHitPoint[a] =
         rayVector[a] > 0 ?
           // the ray's direction is toward the surface on "zero"
           rayStartPoint[a] > 0 ?
@@ -65,24 +65,26 @@ export function get_entry_point_3d_of_ray_3d_with_cube(
           rayStartPoint[a] // in the cube
         : side; // on the surface
 
-      rayHitPoint[b] =
-        rayStartPoint[b] + (rayHitPoint[a] - rayStartPoint[a]) * (rayVector[b] / rayVector[a]); // thales
+      outputRayHitPoint[b] =
+        rayStartPoint[b] +
+        (outputRayHitPoint[a] - rayStartPoint[a]) * (rayVector[b] / rayVector[a]); // thales
       // rayHitPoint[b] = rayStartPoint[b] * (rayEndPoint[a] - rayHitPoint[a]) + rayEndPoint[b] * (rayHitPoint[a] - rayStartPoint[a]);
 
       if (
-        (0 < rayHitPoint[b] || (rayHitPoint[b] === 0 && rayVector[b] > 0)) &&
-        (rayHitPoint[b] < side || (rayHitPoint[b] === side && rayVector[b] < 0)) // rayVector[b] inside or next step inside
+        (0 < outputRayHitPoint[b] || (outputRayHitPoint[b] === 0 && rayVector[b] > 0)) &&
+        (outputRayHitPoint[b] < side || (outputRayHitPoint[b] === side && rayVector[b] < 0)) // rayVector[b] inside or next step inside
       ) {
-        rayHitPoint[c] =
-          rayStartPoint[c] + (rayHitPoint[a] - rayStartPoint[a]) * (rayVector[c] / rayVector[a]); // thales
+        outputRayHitPoint[c] =
+          rayStartPoint[c] +
+          (outputRayHitPoint[a] - rayStartPoint[a]) * (rayVector[c] / rayVector[a]); // thales
 
         if (
-          (0 < rayHitPoint[c] || (rayHitPoint[c] === 0 && rayVector[c] > 0)) &&
-          (rayHitPoint[c] < side || (rayHitPoint[c] === side && rayVector[c] < 0)) // rayVector[c] inside or next step inside
+          (0 < outputRayHitPoint[c] || (outputRayHitPoint[c] === 0 && rayVector[c] > 0)) &&
+          (outputRayHitPoint[c] < side || (outputRayHitPoint[c] === side && rayVector[c] < 0)) // rayVector[c] inside or next step inside
         ) {
-          normalVector[a] = rayVector[a] > 0 ? -1 : 1;
-          normalVector[b] = 0;
-          normalVector[c] = 0;
+          outputNormalVector[a] = rayVector[a] > 0 ? -1 : 1;
+          outputNormalVector[b] = 0;
+          outputNormalVector[c] = 0;
           return true;
         }
       }

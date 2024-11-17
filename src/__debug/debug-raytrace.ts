@@ -9,6 +9,7 @@ import {
   mat4_translate,
   vec3_create,
   vec3_from_values,
+  vec3_length,
 } from '@lifaon/math';
 import { createAnimationFrameLoop, createEventListener } from '@lirx/utils';
 import { FreeViewMatrix } from '../camera/free-camera';
@@ -19,7 +20,8 @@ import { LinearDynamicMemory } from '../memory/shared/dynamic/linear-dynamic-mem
 import { render_voxel_octrees_and_lights_in_image_data_using_cpu } from '../render/functions/render_voxel_octrees_and_lights_in_image_data_using_cpu';
 import { Camera } from '../scene/components/camera/camera';
 import { Light } from '../scene/components/light/light';
-import { ImageDataCPURenderer } from '../scene/components/renderer/renderer';
+import { ImageDataCPURenderer } from '../scene/components/renderer/cpu-renderer/cpu-renderer';
+import { get_intersection_point_3d_of_ray_3d_with_voxel_octree } from '../scene/components/renderer/cpu-renderer/functions/get_intersection_point_3d_of_ray_3d_with_voxel_octree/get_intersection_point_3d_of_ray_3d_with_voxel_octree';
 import { Scene } from '../scene/components/scene/scene';
 import { VoxelOctreeIn3DSpace } from '../scene/components/voxel-octree/voxel-octree-in-3d-space';
 import { RadialLightIn3dSpaceTrait } from '../scene/traits/light/radial-light-in-3d-space.trait';
@@ -27,7 +29,6 @@ import { ReadonlyLightSpectrum } from '../scene/traits/light/types/light-spectru
 import { VoxelOctreeIn3dSpaceTrait } from '../scene/traits/voxel-octree/voxel-octree-in-3d-space.trait';
 import { Texture2D } from '../texture/texture-2d/texture-2d';
 import { NO_MATERIAL } from '../voxel/octree/special-addresses.constant';
-import { get_intersection_point_3d_of_ray_3d_with_voxel_octree } from '../voxel/raytrace/get_intersection_point_3d_of_ray_3d_with_voxel_octree/get_intersection_point_3d_of_ray_3d_with_voxel_octree';
 import { VoxelOctree } from '../voxel/texture-3d/voxel-octree';
 
 // MVP => https://jsantell.com/model-view-projection/#:~:text=The%20model%2C%20view%2C%20and%20projection,coordinates%20via%20implicit%20perspective%20division.
@@ -281,13 +282,13 @@ async function debugRayTrace2() {
 
   /* CREATE LIGHTS */
 
-  const ambient: number = 0;
+  // const ambient: number = 0;
   // const ambient: number = 0.1;
-  // const ambient: number = 0.5;
+  const ambient: number = 0.5;
   // const ambient: number = 1;
   const ambientLightSpectrum: ReadonlyLightSpectrum = vec3_from_values(ambient, ambient, ambient);
 
-  const sunLight = Light.fromRadius([1, 1, 1], 1000);
+  const sunLight = Light.fromRadius([1, 1, 1], vec3_length([-1000, -1000, 1000]) * (1 - ambient));
   mat4_translate(sunLight.matrix, sunLight.matrix, [-1000, -1000, 1000]);
   // mat4_translate(sunLight.matrix, sunLight.matrix, [0, 0, -1000]);
 
@@ -316,6 +317,8 @@ async function debugRayTrace2() {
   //   // camera is at [0, 0, -side], and look in direction [0, 0, 0] (up is Y axis)
   //   [30, 30, -32],
   //   [30, 30, 0],
+  //   // [0, 0, -32],
+  //   // [0, 0, 0],
   //   [0, -1, 0],
   // );
   const freeViewMatrix = new FreeViewMatrix({ translationSpeed: 5, rotationSpeed: 0.5 }).start();
@@ -354,6 +357,7 @@ async function debugRayTrace2() {
   const update = (): void => {
     // console.time('render');
 
+    // sun rotation effect
     mat4_multiply(sunLight.matrix, rot, sunLight.matrix);
 
     freeViewMatrix.update();

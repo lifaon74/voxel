@@ -1,7 +1,7 @@
 import { math_floor, u32, vec3_u32 } from '@lifaon/math';
 
 /**
- * Returns the coordinates of the <voxelOctree> containing `voxelPosition`.
+ * Returns the coordinates of the `<voxelOctree>` containing `voxelPosition`.
  *
  * Works in voxel space (integer coordinates).
  */

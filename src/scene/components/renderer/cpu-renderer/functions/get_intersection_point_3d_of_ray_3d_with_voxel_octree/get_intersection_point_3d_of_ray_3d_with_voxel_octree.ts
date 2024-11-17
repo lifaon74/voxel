@@ -8,18 +8,19 @@ import {
   vec3_subtract,
   vec3_u32,
 } from '@lifaon/math';
-import { MemoryReadU32BETrait } from '../../../memory/read/readonly/traits/methods/memory.read_u32_be.trait';
-import { MemoryReadU8Trait } from '../../../memory/read/readonly/traits/methods/memory.read_u8.trait';
-import { voxel_octree_depth_to_side } from '../../octree/depth-side/voxel_octree_depth_to_side';
-import { NO_MATERIAL } from '../../octree/special-addresses.constant';
-import { get_voxel_octree_child_index_from_position_3d } from '../../octree/voxel-octree-child/index/get_voxel_octree_child_index_from_position_3d';
-import { get_voxel_octree_child_memory_address_from_voxel_octree_child_index } from '../../octree/voxel-octree-child/index/get_voxel_octree_child_memory_address_from_voxel_octree_child_index';
-import { is_voxel_octree_child_index_a_voxel_octree_address } from '../../octree/voxel-octree-child/index/is_voxel_octree_child_index_a_voxel_octree_address';
-import { get_entry_point_3d_of_ray_3d_with_cube } from '../get_entry_point_3d_of_ray_3d_with_cube/get_entry_point_3d_of_ray_3d_with_cube';
-import { get_exit_point_3d_of_ray_3d_with_cube } from '../get_exit_point_3d_of_ray_3d_with_cube/get_exit_point_3d_of_ray_3d_with_cube';
-import { get_voxel_octree_position_3d_from_voxel_position_3d } from '../get_voxel_octree_position_3d_from_voxel_position_3d';
-import { get_voxel_position_3d_from_ray_hit_point_3d } from '../get_voxel_position_3d_from_ray_hit_point_3d';
-import { is_point_3d_on_cube_surface_or_outside } from '../is_point_on_cube_surface_or_outside/is_point_3d_on_cube_surface_or_outside';
+import { MemoryReadU32BETrait } from '../../../../../../memory/read/readonly/traits/methods/memory.read_u32_be.trait';
+import { MemoryReadU8Trait } from '../../../../../../memory/read/readonly/traits/methods/memory.read_u8.trait';
+import { ptr, ptr_set } from '../../../../../../misc/ptr';
+import { voxel_octree_depth_to_side } from '../../../../../../voxel/octree/depth-side/voxel_octree_depth_to_side';
+import { NO_MATERIAL } from '../../../../../../voxel/octree/special-addresses.constant';
+import { get_voxel_octree_child_index_from_position_3d } from '../../../../../../voxel/octree/voxel-octree-child/index/get_voxel_octree_child_index_from_position_3d';
+import { get_voxel_octree_child_memory_address_from_voxel_octree_child_index } from '../../../../../../voxel/octree/voxel-octree-child/index/get_voxel_octree_child_memory_address_from_voxel_octree_child_index';
+import { is_voxel_octree_child_index_a_voxel_octree_address } from '../../../../../../voxel/octree/voxel-octree-child/index/is_voxel_octree_child_index_a_voxel_octree_address';
+import { get_entry_point_3d_of_ray_3d_with_cube } from './functions/get_entry_point_3d_of_ray_3d_with_cube/get_entry_point_3d_of_ray_3d_with_cube';
+import { get_exit_point_3d_of_ray_3d_with_cube } from './functions/get_exit_point_3d_of_ray_3d_with_cube/get_exit_point_3d_of_ray_3d_with_cube';
+import { get_voxel_octree_position_3d_from_voxel_position_3d } from './functions/get_voxel_octree_position_3d_from_voxel_position_3d/get_voxel_octree_position_3d_from_voxel_position_3d';
+import { get_voxel_position_3d_from_ray_hit_point_3d } from './functions/get_voxel_position_3d_from_ray_hit_point_3d/get_voxel_position_3d_from_ray_hit_point_3d';
+import { is_point_3d_on_cube_surface_or_outside } from './functions/is_point_on_cube_surface_or_outside/is_point_3d_on_cube_surface_or_outside';
 
 const VOXEL_POSITION: vec3_u32 = vec3_create_u32();
 const RAY_START_POINT: vec3 = vec3_create();
@@ -29,8 +30,19 @@ export type GetIntersectionPoint3dOfRay3dWithVoxelOctreeMemory = MemoryReadU8Tra
   MemoryReadU32BETrait;
 
 /**
- * Returns the hit point of a ray and a <voxelOctree>.
- *  - assumes the cube has no transformation (no translation nor rotation)
+ * Computes the **intersection** point of a ray and a `<voxelOctree>`.
+ *
+ * **INFO**: the `<voxelOctree>` is placed at (0, 0, 0) and "grows" on each axis with a side of `side` (voxel space).
+ *
+ * @param rayStartPoint
+ * @param rayEndPoint
+ * @param memory
+ * @param voxelOctreeAddress
+ * @param voxelOctreeDepth
+ * @param outputRayHitPoint the point where the ray hits the `<voxelOctree>`
+ * @param outputNormalVector the normal vector (relative to the surface) where the ray hits the `<voxelOctree>`.
+ * @param outputVoxelMaterialAddress the material address where the ray hits `<voxelOctree>`
+ * @returns `true` if the ray hit something
  */
 export function get_intersection_point_3d_of_ray_3d_with_voxel_octree(
   // RAY
@@ -41,9 +53,10 @@ export function get_intersection_point_3d_of_ray_3d_with_voxel_octree(
   voxelOctreeAddress: u32,
   voxelOctreeDepth: u8,
   // OUTPUTS
-  rayHitPoint: vec3,
-  normalVector: vec3,
-): u32 /* voxelMaterialAddress */ {
+  outputRayHitPoint: vec3,
+  outputNormalVector: vec3,
+  outputVoxelMaterialAddress: ptr<u32>,
+): boolean {
   const side: u32 = voxel_octree_depth_to_side(voxelOctreeDepth);
 
   if (
@@ -51,15 +64,15 @@ export function get_intersection_point_3d_of_ray_3d_with_voxel_octree(
       rayStartPoint,
       rayEndPoint,
       side,
-      rayHitPoint,
-      normalVector,
+      outputRayHitPoint,
+      outputNormalVector,
     )
   ) {
     let i: u32 = 0;
     while (i++ < side) {
       // converts this entry or exit point into the voxel coordinates space
       get_voxel_position_3d_from_ray_hit_point_3d(
-        rayHitPoint,
+        outputRayHitPoint,
         rayStartPoint,
         rayEndPoint,
         VOXEL_POSITION,
@@ -116,30 +129,31 @@ export function get_intersection_point_3d_of_ray_3d_with_voxel_octree(
                 RAY_START_POINT,
                 RAY_END_POINT,
                 localSide,
-                rayHitPoint,
-                normalVector,
+                outputRayHitPoint,
+                outputNormalVector,
               )
             ) {
               // translates the resulting exit point to the real coordinates space
-              vec3_add(rayHitPoint, rayHitPoint, VOXEL_POSITION);
+              vec3_add(outputRayHitPoint, outputRayHitPoint, VOXEL_POSITION);
 
               // finally we check if the point leaves the <voxelOctree>
-              if (is_point_3d_on_cube_surface_or_outside(rayHitPoint, side)) {
-                return NO_MATERIAL;
+              if (is_point_3d_on_cube_surface_or_outside(outputRayHitPoint, side)) {
+                return false;
               } else {
                 break;
               }
             } else {
-              return NO_MATERIAL;
+              return false;
             }
           } else {
-            return voxelOctreeChildAddress;
+            ptr_set(outputVoxelMaterialAddress, voxelOctreeChildAddress);
+            return true;
           }
         }
       }
     }
-    return NO_MATERIAL;
+    return false;
   } else {
-    return NO_MATERIAL;
+    return false;
   }
 }

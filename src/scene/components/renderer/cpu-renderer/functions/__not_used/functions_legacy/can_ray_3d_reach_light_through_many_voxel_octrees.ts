@@ -6,8 +6,8 @@ import {
   vec3_create,
   vec3_transform_mat4,
 } from '@lifaon/math';
-import { VoxelOctreeIn3dSpaceTrait } from '../../../../scene/traits/voxel-octree/voxel-octree-in-3d-space.trait';
-import { NO_MATERIAL } from '../../../octree/special-addresses.constant';
+import { VoxelOctreeIn3dSpaceTrait } from '../../../../../../traits/voxel-octree/voxel-octree-in-3d-space.trait';
+import { NO_MATERIAL } from '../../../../../../../voxel/octree/special-addresses.constant';
 import { get_intersection_point_3d_of_ray_3d_with_voxel_octree } from '../../voxel-octree/get_intersection_point_3d_of_ray_3d_with_voxel_octree';
 
 export function can_ray_3d_reach_light_through_many_voxel_octrees(
