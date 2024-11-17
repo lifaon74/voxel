@@ -159,11 +159,41 @@ async function debugTexture3d_04() {
   document.body.appendChild(button);
 }
 
+async function debugTexture3d_05() {
+  const url = new URL(
+    '../../assets/tilesets/16x16/d36bih3-7bd0f401-eaaa-493a-b102-e5abbcb3bc67.png?raw',
+    import.meta.url,
+  );
+  const texture2d: Texture2D = await Texture2D.fromUrl(url);
+
+  const base_size: u32 = 16;
+
+  const tile = texture2d.crop(5 * base_size, 21 * base_size, base_size, base_size);
+  draw_image_data(tile.toImageData(), 4);
+
+  const top = tile.crop(0, 0, base_size, base_size / 2).scale(base_size, base_size);
+  draw_image_data(top.toImageData(), 4);
+  const bottom = tile.crop(0, base_size / 2, base_size, base_size / 2).scale(base_size, base_size);
+  draw_image_data(bottom.toImageData(), 4);
+
+  const vox = isometric_textures_2d_to_texture_3d(top, bottom, Texture3D);
+
+  const button = createSaveButton(async () => {
+    await save_texture_3d_as_vox_file(vox, {
+      startIn: 'downloads',
+      suggestedName: 'demo.vox',
+    });
+  });
+
+  document.body.appendChild(button);
+}
+
 /*--------------------------*/
 
 export async function debugTexture3d() {
   // debugTexture3d1();
   // await debugTexture3d_02();
   // await debugTexture3d_03();
-  await debugTexture3d_04();
+  // await debugTexture3d_04();
+  await debugTexture3d_05();
 }

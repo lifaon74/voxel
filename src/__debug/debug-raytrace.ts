@@ -29,6 +29,8 @@ import { ReadonlyLightSpectrum } from '../scene/traits/light/types/light-spectru
 import { VoxelOctreeIn3dSpaceTrait } from '../scene/traits/voxel-octree/voxel-octree-in-3d-space.trait';
 import { Texture2D } from '../texture/texture-2d/texture-2d';
 import { NO_MATERIAL } from '../voxel/octree/special-addresses.constant';
+import { deduplicate_voxel_octrees_materials } from '../voxel/optimize/functions/deduplicate_voxel_octrees_materials';
+import { simplify_voxel_octree } from '../voxel/optimize/functions/simplify_voxel_octree';
 import { VoxelOctree } from '../voxel/texture-3d/voxel-octree';
 
 // MVP => https://jsantell.com/model-view-projection/#:~:text=The%20model%2C%20view%2C%20and%20projection,coordinates%20via%20implicit%20perspective%20division.
@@ -57,50 +59,6 @@ http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/
    (A^-1)^-1 = A
    (A*B)^-1 = B^-1 * A^-1
   */
-
-// export function render_scene_in_image_data_using_cpu(
-//   imageData: ImageData,
-//   scene: Scene,
-// ): ImageData {
-//   const vp: mat4 = mat4_multiply(
-//     mat4_create(),
-//     scene.camera.projectionMatrix,
-//     scene.camera.viewMatrix,
-//   );
-//
-//   return render_voxel_octrees_and_lights_in_image_data_using_cpu(
-//     imageData,
-//     scene.voxelOctrees.map((voxelOctree: VoxelOctreeIn3DSpace): VoxelOctreeIn3dSpaceTrait => {
-//       const mvp: mat4 = mat4_create();
-//       const mvpi: mat4 = mat4_create();
-//
-//       mat4_multiply(mvp, vp, voxelOctree.matrix);
-//       mat4_invert(mvpi, mvp);
-//
-//       return {
-//         memory: voxelOctree.memory,
-//         address: voxelOctree.address,
-//         depth: voxelOctree.depth,
-//         mvp,
-//         mvpi,
-//       };
-//     }),
-//     scene.lights.map((light: Light): RadialLightIn3dSpaceTrait => {
-//       const mvp: mat4 = mat4_create();
-//       const mvpi: mat4 = mat4_create();
-//
-//       mat4_multiply(mvp, vp, light.matrix);
-//       mat4_invert(mvpi, mvp);
-//
-//       return {
-//         spectrum: light.spectrum,
-//         mvp,
-//         mvpi,
-//       };
-//     }),
-//     scene.ambientLightSpectrum,
-//   );
-// }
 
 async function debugRayTrace1() {
   console.time('gen');
@@ -270,10 +228,12 @@ async function debugRayTrace2() {
       VoxelOctree<LinearDynamicMemory>
     >(url, VoxelOctree);
 
+    // deduplicate_voxel_octrees_materials(texture.memory, [texture.address]);
+    // simplify_voxel_octree(texture.memory, texture.address);
+
     return new VoxelOctreeIn3DSpace(texture);
   };
 
-  // const rainbowVoxelOctree = createRainbowVoxelOctree(16);
   const importedVoxelOctree = await importVoxelOctree();
   // const importedVoxelOctree2 = await importVoxelOctree();
   // mat4_translate(importedVoxelOctree2.matrix, importedVoxelOctree2.matrix, [32, 0, 0]);
@@ -285,21 +245,25 @@ async function debugRayTrace2() {
   // const ambient: number = 0;
   // const ambient: number = 0.1;
   const ambient: number = 0.5;
+  // const ambient: number = 0.7;
   // const ambient: number = 1;
   const ambientLightSpectrum: ReadonlyLightSpectrum = vec3_from_values(ambient, ambient, ambient);
 
-  const sunLight = Light.fromRadius([1, 1, 1], vec3_length([-1000, -1000, 1000]) * (1 - ambient));
-  mat4_translate(sunLight.matrix, sunLight.matrix, [-1000, -1000, 1000]);
+  const sunLight = Light.fromRadius(
+    [1, 1, 1],
+    vec3_length([-1000, -1000, 1000]) * (1 - ambient) * 1.5,
+  );
+  mat4_translate(sunLight.matrix, sunLight.matrix, [1000, -1000, 1000]);
   // mat4_translate(sunLight.matrix, sunLight.matrix, [0, 0, -1000]);
 
-  // const spotLight0 = Light.fromRadius([1, 1, 1], 16);
-  // mat4_translate(spotLight0.matrix, spotLight0.matrix, [64.5, 64.5, 64.5]);
-  //
-  // const spotLight1 = Light.fromRadius([1, 1, 1], 1000);
-  // mat4_translate(spotLight1.matrix, spotLight1.matrix, [-2000, -1000, 1000]);
-  //
-  // const spotLight2 = Light.fromRadius([1, 1, 1], 1000);
-  // mat4_translate(spotLight2.matrix, spotLight2.matrix, [-1000, -2000, 1000]);
+  const spotLight0 = Light.fromRadius([1, 1, 1], 16);
+  mat4_translate(spotLight0.matrix, spotLight0.matrix, [64.5, 64.5, 64.5]);
+
+  const spotLight1 = Light.fromRadius([1, 1, 1], 1000);
+  mat4_translate(spotLight1.matrix, spotLight1.matrix, [-2000, -1000, 1000]);
+
+  const spotLight2 = Light.fromRadius([1, 1, 1], 1000);
+  mat4_translate(spotLight2.matrix, spotLight2.matrix, [-1000, -2000, 1000]);
 
   /* CREATE CAMERA */
 
@@ -328,15 +292,10 @@ async function debugRayTrace2() {
   const scene = new Scene({
     camera,
     ambientLightSpectrum,
-    voxelOctrees: [
-      // rainbowVoxelOctree,
-      importedVoxelOctree,
-    ],
+    voxelOctrees: [importedVoxelOctree],
     lights: [
       sunLight,
-      // spotLight0,
-      // spotLight1,
-      // spotLight2,
+      // spotLight0, spotLight1, spotLight2
     ],
   });
 
@@ -358,7 +317,7 @@ async function debugRayTrace2() {
     // console.time('render');
 
     // sun rotation effect
-    mat4_multiply(sunLight.matrix, rot, sunLight.matrix);
+    // mat4_multiply(sunLight.matrix, rot, sunLight.matrix);
 
     freeViewMatrix.update();
     mat4_multiply(camera.viewMatrix, freeViewMatrix.matrix, camera.viewMatrix);
@@ -389,7 +348,7 @@ async function debugRayTrace2() {
   };
 
   startUpdateLoop();
-  // render();
+  render();
 }
 
 /*--------------------------*/

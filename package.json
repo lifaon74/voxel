@@ -22,9 +22,9 @@
   },
   "dependencies": {
     "@lifaon/math": "beta",
-    "@lifaon/traits": "latest",
-    "@lirx/unsubscribe": "latest",
-    "@lirx/utils": "latest",
+    "@lifaon/traits": "beta",
+    "@lirx/unsubscribe": "beta",
+    "@lirx/utils": "beta",
     "tslib": "^2.8.1"
   },
   "packageManager": "yarn@4.5.1"

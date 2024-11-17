@@ -1,4 +1,4 @@
-import { u32, u8 } from '@lifaon/math';
+import { f32, u32, u8 } from '@lifaon/math';
 import { mixin, NEW } from '@lifaon/traits';
 import { TextureColor } from '../types/texture-color';
 import { Texture2DFactoryFromImageBitmapImplementationUsingFromImageData } from './factory/implementations/generic/texture-2d-factory-from-image-bitmap-implementation-using-from-image-data.implementation';
@@ -6,8 +6,10 @@ import { Texture2DFactoryFromImageBitmapSourceImplementationUsingFromImageBitmap
 import { Texture2DFactoryFromUrlImplementationUsingFromImageBitmapSource } from './factory/implementations/generic/texture-2d-factory-from-url-implementation-using-from-image-bitmap-source.implementation';
 import { Texture2DApplyPaletteImplementationUsingSizeAndGetColorAndSetColor } from './implementations/generic/texture-2d.apply-palette.implementation.using-size-and-get-color-and-set-color';
 import { Texture2DReduceColorDepthImplementationUsingSizeAndGetColorAndSetColor } from './implementations/generic/texture-2d.reduce-color-depth.implementation.using-size-and-get-color-and-set-color';
+import { Texture2DScaleImplementationUsingNewAndSizeAndGetColorAndSetColor } from './implementations/generic/texture-2d.scale.implementation.using-new-and-size-and-get-color-and-set-color';
 import { Texture2DCropTrait } from './traits/methods/texture-2d.crop.trait';
 import { Texture2DGetColorTrait } from './traits/methods/texture-2d.get-color.trait';
+import { Texture2DScaleTrait } from './traits/methods/texture-2d.scale.trait';
 import { Texture2DSetColorTrait } from './traits/methods/texture-2d.set-color.trait';
 import { Texture2DToImageDataTrait } from './traits/methods/texture-2d.to-image-data.trait';
 import { Texture2DSizeTrait } from './traits/properties/texture-2d.size.trait';
@@ -41,6 +43,7 @@ export class Texture2D
     Texture2DSetColorTrait,
     Texture2DNewTrait<Texture2D>,
     Texture2DCropTrait<Texture2D>,
+    Texture2DScaleTrait<Texture2D>,
     Texture2DToImageDataTrait
 {
   static create(x: u32, y: u32): Texture2D {
@@ -111,6 +114,22 @@ export class Texture2D
         output.data[outputIndex + 1] = this.data[thisIndex + 1];
         output.data[outputIndex + 2] = this.data[thisIndex + 2];
         output.data[outputIndex + 3] = this.data[thisIndex + 3];
+      }
+    }
+
+    return output;
+  }
+
+  scale(x: u32, y: u32): Texture2D {
+    const output: Texture2D = this[NEW](x, y);
+
+    const xf: f32 = this.x / x;
+    const yf: f32 = this.y / y;
+
+    for (let _y: u32 = 0; _y < y; _y++) {
+      for (let _x: u32 = 0; _x < x; _x++) {
+        const [r, g, b, a]: TextureColor = this.getColor(Math.floor(xf * _x), Math.floor(yf * _y));
+        output.setColor(_x, _y, r, g, b, a);
       }
     }
 
