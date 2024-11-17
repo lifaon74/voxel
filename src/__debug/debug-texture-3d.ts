@@ -6,6 +6,7 @@ import { DEFAULT_VOX_PALETTE } from '../formats/vox-file/palette/default-vox-pal
 import { draw_image_data } from '../image/canvas/draw_image_data';
 import { extrude_texture_2d_to_texture_3d } from '../texture/operations/extrude_texture_2d_to_texture_3d';
 import { isometric_textures_2d_to_texture_3d } from '../texture/operations/isometric_textures_2d_to_texture_3d';
+import { save_texture_2d_as_png } from '../texture/texture-2d/operations/save_texture_2d_as_png';
 import { Texture2D } from '../texture/texture-2d/texture-2d';
 import { ColorPalette } from '../texture/texture-2d/traits/methods/texture-2d.apply-palette.trait';
 import { Texture3D } from '../texture/texture-3d/texture-3d';
@@ -179,9 +180,13 @@ async function debugTexture3d_05() {
   const vox = isometric_textures_2d_to_texture_3d(top, bottom, Texture3D);
 
   const button = createSaveButton(async () => {
-    await save_texture_3d_as_vox_file(vox, {
+    // await save_texture_3d_as_vox_file(vox, {
+    //   startIn: 'downloads',
+    //   suggestedName: 'demo.vox',
+    // });
+    await save_texture_2d_as_png(tile, {
       startIn: 'downloads',
-      suggestedName: 'demo.vox',
+      suggestedName: 'demo.png',
     });
   });
 
