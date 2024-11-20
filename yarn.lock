@@ -722,6 +722,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@webgpu/types@npm:^0.1.51":
+  version: 0.1.51
+  resolution: "@webgpu/types@npm:0.1.51"
+  checksum: 10c0/38d5954fffd291936d5c11eaf3e25cae599e0164771a87b2558451aefd44ecc3e1752ed89a463ef1d9e47207db040f19e0b576d460340c07717c36288709bc17
+  languageName: node
+  linkType: hard
+
 "abbrev@npm:^2.0.0":
   version: 2.0.0
   resolution: "abbrev@npm:2.0.0"
@@ -2200,6 +2207,7 @@ __metadata:
     "@lirx/unsubscribe": "npm:beta"
     "@lirx/utils": "npm:beta"
     "@vitest/coverage-v8": "npm:2.1.4"
+    "@webgpu/types": "npm:^0.1.51"
     prettier: "npm:^3.3.3"
     prettier-plugin-organize-imports: "npm:^4.1.0"
     sass: "npm:^1.80.6"

@@ -5,8 +5,8 @@ import { debugVoxel } from './__debug/debug-voxel';
 
 function main(): void {
   // debugVoxel();
-  debugTexture3d();
-  // debugRayTrace();
+  // debugTexture3d();
+  debugRayTrace();
   // debugPlacement();
 }
 

@@ -13,6 +13,7 @@
   "sideEffects": false,
   "devDependencies": {
     "@vitest/coverage-v8": "2.1.4",
+    "@webgpu/types": "^0.1.51",
     "prettier": "^3.3.3",
     "prettier-plugin-organize-imports": "^4.1.0",
     "sass": "^1.80.6",

@@ -16,12 +16,15 @@ import { FreeViewMatrix } from '../camera/free-camera';
 import { load_vox_file_url_as_texture_3d } from '../formats/vox-file/load-and-save/load/load_vox_file_url_as_texture_3d';
 import { create_canvas_context } from '../image/canvas/create_canvas_context';
 import { draw_image_data } from '../image/canvas/draw_image_data';
+import { setup_canvas } from '../image/canvas/setup_canvas';
 import { LinearDynamicMemory } from '../memory/shared/dynamic/linear-dynamic-memory';
 import { render_voxel_octrees_and_lights_in_image_data_using_cpu } from '../render/functions/render_voxel_octrees_and_lights_in_image_data_using_cpu';
 import { Camera } from '../scene/components/camera/camera';
 import { Light } from '../scene/components/light/light';
-import { ImageDataCPURenderer } from '../scene/components/renderer/cpu-renderer/cpu-renderer';
+import { CPURenderer } from '../scene/components/renderer/cpu-renderer/cpu-renderer';
 import { get_intersection_point_3d_of_ray_3d_with_voxel_octree } from '../scene/components/renderer/cpu-renderer/functions/get_intersection_point_3d_of_ray_3d_with_voxel_octree/get_intersection_point_3d_of_ray_3d_with_voxel_octree';
+import { ImageDataCPURenderer } from '../scene/components/renderer/cpu-renderer/image-data-cpu-renderer.ts.bcp1';
+import { WebGPURenderer } from '../scene/components/renderer/webgpu-renderer/webgpu-renderer';
 import { Scene } from '../scene/components/scene/scene';
 import { VoxelOctreeIn3DSpace } from '../scene/components/voxel-octree/voxel-octree-in-3d-space';
 import { RadialLightIn3dSpaceTrait } from '../scene/traits/light/radial-light-in-3d-space.trait';
@@ -303,19 +306,14 @@ async function debugRayTrace2() {
 
   const windowSize = 256;
 
-  const renderer = new ImageDataCPURenderer(new ImageData(windowSize, windowSize));
-
-  const ctx: CanvasRenderingContext2D = create_canvas_context(
-    renderer.imageData.width,
-    renderer.imageData.height,
-    2,
-  );
+  // const renderer = new CPURenderer(windowSize, windowSize);
+  const renderer = new WebGPURenderer(windowSize, windowSize);
+  await renderer.ready;
+  setup_canvas(renderer.canvas, windowSize, windowSize, 2);
 
   const rot = mat4_rotate_z(mat4_create(), mat4_create(), Math.PI * 0.01);
 
   const update = (): void => {
-    // console.time('render');
-
     // sun rotation effect
     // mat4_multiply(sunLight.matrix, rot, sunLight.matrix);
 
@@ -323,32 +321,27 @@ async function debugRayTrace2() {
     mat4_multiply(camera.viewMatrix, freeViewMatrix.matrix, camera.viewMatrix);
 
     renderer.render(scene);
-
-    // console.timeEnd('render');
-
-    ctx.putImageData(renderer.imageData, 0, 0);
   };
 
-  const startUpdateLoop = () => {
+  const startUpdateLoop = (): void => {
     const unsubscribe = createAnimationFrameLoop(update);
 
     createEventListener(window, 'keydown', (event: KeyboardEvent): void => {
       if (event.code === 'KeyC' && event.ctrlKey) {
         unsubscribe();
         renderer.clear();
-        ctx.putImageData(renderer.imageData, 0, 0);
       }
     });
   };
 
-  const render = () => {
+  const render = (): void => {
     console.time('render');
     update();
     console.timeEnd('render');
   };
 
   startUpdateLoop();
-  render();
+  // render();
 }
 
 /*--------------------------*/

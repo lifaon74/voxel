@@ -1,0 +1,19 @@
+import { RendererTrait } from '../../../traits/renderer/renderer.trait';
+import { Scene } from '../../scene/scene';
+import { render_scene_using_cpu } from './functions/render_scene_using_cpu/render_scene_using_cpu';
+
+export class ImageDataCPURenderer implements RendererTrait {
+  readonly imageData: ImageData;
+
+  constructor(imageData: ImageData) {
+    this.imageData = imageData;
+  }
+
+  clear(): void {
+    this.imageData.data.fill(0);
+  }
+
+  render(scene: Scene): void {
+    render_scene_using_cpu(scene, this.imageData);
+  }
+}

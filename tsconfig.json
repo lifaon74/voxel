@@ -38,7 +38,8 @@
       "dom"
     ],
     "typeRoots": [
-      "./node_modules/@types"
+      "./node_modules/@types",
+      "./node_modules/@webgpu/types"
     ],
     "baseUrl": ".",
     "module": "esnext",
