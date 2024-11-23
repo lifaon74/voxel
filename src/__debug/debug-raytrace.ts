@@ -18,12 +18,10 @@ import { create_canvas_context } from '../image/canvas/create_canvas_context';
 import { draw_image_data } from '../image/canvas/draw_image_data';
 import { setup_canvas } from '../image/canvas/setup_canvas';
 import { LinearDynamicMemory } from '../memory/shared/dynamic/linear-dynamic-memory';
-import { render_voxel_octrees_and_lights_in_image_data_using_cpu } from '../render/functions/render_voxel_octrees_and_lights_in_image_data_using_cpu';
 import { Camera } from '../scene/components/camera/camera';
 import { Light } from '../scene/components/light/light';
 import { CPURenderer } from '../scene/components/renderer/cpu-renderer/cpu-renderer';
 import { get_intersection_point_3d_of_ray_3d_with_voxel_octree } from '../scene/components/renderer/cpu-renderer/functions/get_intersection_point_3d_of_ray_3d_with_voxel_octree/get_intersection_point_3d_of_ray_3d_with_voxel_octree';
-import { ImageDataCPURenderer } from '../scene/components/renderer/cpu-renderer/image-data-cpu-renderer.ts.bcp1';
 import { WebGPURenderer } from '../scene/components/renderer/webgpu-renderer/webgpu-renderer';
 import { Scene } from '../scene/components/scene/scene';
 import { VoxelOctreeIn3DSpace } from '../scene/components/voxel-octree/voxel-octree-in-3d-space';
@@ -340,8 +338,8 @@ async function debugRayTrace2() {
     console.timeEnd('render');
   };
 
-  startUpdateLoop();
-  // render();
+  // startUpdateLoop();
+  render();
 }
 
 /*--------------------------*/
